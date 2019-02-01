@@ -34,6 +34,7 @@
 // Include(s)
 //****************************************************************************
 
+#include "main_fsm.h"
 #include "main.h"
 #include "misc.h"
 #include "ui.h"
@@ -57,13 +58,24 @@ void (*fsmCases[10])(void) = {&mainFSM0, &mainFSM1, &mainFSM2, &mainFSM3, \
 // Function(s)
 //****************************************************************************
 
+// attribute guarantees inlining unless inlining "causes a problem"
+// for example: inlining a recursive function into itself is only done once
+__attribute__((always_inline)) __STATIC_INLINE void runFSM(uint8_t index)
+{
+	activeFSM = index;
+	//DEBUG_H2(1);
+	fsmCases[index]();
+	//DEBUG_H2(0);
+	activeFSM = FSMS_INACTIVE;
+}
+
 int main(void)
 {
 	//Power on delay with LEDs
 	power_on();	     
 	
 	//Prepare FlexSEA Stack & communication:
-    init_flexsea_payload_ptr();
+	init_flexsea_payload_ptr();
 	initLocalComm();
 
 	//Initialize all the peripherals
@@ -78,10 +90,10 @@ int main(void)
 	//Test code, use with care. Normal code might NOT run when enabled!
 	//test_code_blocking();
 	//test_code_non_blocking();
-    
+	
 	//Project specific initialization code
 	init_user();
-    
+
     //Turn on manage
    	bootManage();
 	
@@ -93,16 +105,14 @@ int main(void)
 			//If the time share slot changed we run the timing FSM. Refer to
 			//timing.xlsx for more details. 't1_new_value' updates at 10kHz,
 			//each slot at 1kHz.			
-            
-            t1_new_value = 0;            
 			
-			//Timing FSM:
-			fsmCases[t1_time_share]();
+			t1_new_value = 0;			
 			
+            runFSM(t1_time_share);
+
 			//Increment value, limits to 0-9
-        	t1_time_share++;
-	        t1_time_share %= 10;
-			
+			TICK_COUNTER(t1_time_share, 10);
+            
 			//The code below is executed every 100us, after the previous slot. 
 			//Keep it short! (<10us if possible)
 			mainFSM10kHz();

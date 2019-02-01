@@ -83,13 +83,13 @@ void init_motor(void)
 	
 	#else	//(MOTOR_COMMUT == COMMUT_BLOCK)
 	
-    initCurrentSensing();  
-        
+	initCurrentSensing();  
+		
 	//Start 3 PWM at 0%  
 	PWM_A_Start();
 	//PWM_A_WriteCompare1(0);		//Edge: Compare1, Center: Compare
 	PWM_A_WriteCompare(PWM_AMP);
-    PWM_B_Start();
+	PWM_B_Start();
 	//PWM_B_WriteCompare1(0);
 	PWM_B_WriteCompare(PWM_AMP);
 	PWM_C_Start();
@@ -98,19 +98,19 @@ void init_motor(void)
 	setDmaPwmCompare(PWM_AMP,PWM_AMP,PWM_AMP);
 	initDmaPwmCompare();
 	isr_mot_Start();
-    
-    Control_Reg_1_Write(1);
+	
+	Control_Reg_1_Write(1);
 	PWM_Kill_Write(0);
-    CyDelay(1);     
+	CyDelay(1);
 	
 	//Angle table can be stored in EEPROM or FLASH:
 	#ifdef USE_EEPROM		
 	init_eeprom();	
-    load_eeprom_to_angles();
+	load_eeprom_to_angles();
 	#endif	//USE_EEPROM
 	
-	#ifdef USE_FLASH		
-	init_flash();		
+	#ifdef USE_FLASH
+	init_flash();
 	#endif	//USE_FLASH
 		
 	#endif	//(MOTOR_COMMUT == COMMUT_BLOCK)
@@ -145,60 +145,60 @@ void motor_open_speed_1(int32 voltageToApply)
 	
 	int32_t pwmToApply = 0;
 
-    
+	
 	//only set a pwm if we have a legal/valid battery voltage
 	if(17000 <  safety_cop.v_vb_mv &&  safety_cop.v_vb_mv < 54000)
 	{	
 		pwmToApply = (v*76) / ( safety_cop.v_vb_mv>>4);
 	}
 	
-    #if (MOTOR_COMMUT == COMMUT_BLOCK)
+	#if (MOTOR_COMMUT == COMMUT_BLOCK)
 		
 		uint16 tmp = 0;
-    
-         //Clip PWM to valid range
-    	if(pwm_duty >= MAX_PWM)
-    		pdc = MAX_PWM;
-    	else if(pwm_duty <= MIN_PWM)
-    		pdc = MIN_PWM;
-    	else
-    		pdc = pwm_duty;
-    	
-    	//User defined sign:
-    	pdc = pdc * PWM_SIGN;
-    	
-    	//Save value to structure:
-    	ctrl.pwm = pdc;
-    	
-    	//Change direction according to sign
-    	if(pdc < 0)
-    	{
-    		pdc = -pdc;	//Make it positive
-    		MotorDirection_Write(0);
-
-    	}
-    	else
-    	{
-    		MotorDirection_Write(1);
-    	}
-    	
-    	//Write duty cycle to PWM module
-    	tmp = PWM1DC((uint16)pdc);
-    	PWM_1_WriteCompare1(tmp);
-    	PWM_1_WriteCompare2(PWM2DC(tmp));	//Can't be 0 or the ADC won't trigger
-        
-    #else
+	
+		 //Clip PWM to valid range
+		if(pwm_duty >= MAX_PWM)
+			pdc = MAX_PWM;
+		else if(pwm_duty <= MIN_PWM)
+			pdc = MIN_PWM;
+		else
+			pdc = pwm_duty;
 		
-        if(pwmToApply >= MAX_PWM_ALLOWED)
-    		pwmToApply = MAX_PWM_ALLOWED;
-    	else if(pwmToApply <= -1*MAX_PWM_ALLOWED)
-    		pwmToApply = -1*MAX_PWM_ALLOWED;
-        
-        exec1.sine_commut_pwm = MOTOR_ORIENTATION*(int16_t)(pwmToApply);
-    #endif
-    
-    //dynamicUserData.pwm = MOTOR_ORIENTATION*(int16_t)(pwmToApply);
-    //dynamicUserData.mot_vol = v/10;
+		//User defined sign:
+		pdc = pdc * PWM_SIGN;
+		
+		//Save value to structure:
+		ctrl.pwm = pdc;
+		
+		//Change direction according to sign
+		if(pdc < 0)
+		{
+			pdc = -pdc;	//Make it positive
+			MotorDirection_Write(0);
+
+		}
+		else
+		{
+			MotorDirection_Write(1);
+		}
+		
+		//Write duty cycle to PWM module
+		tmp = PWM1DC((uint16)pdc);
+		PWM_1_WriteCompare1(tmp);
+		PWM_1_WriteCompare2(PWM2DC(tmp));	//Can't be 0 or the ADC won't trigger
+		
+	#else
+		
+		if(pwmToApply >= MAX_PWM_ALLOWED)
+			pwmToApply = MAX_PWM_ALLOWED;
+		else if(pwmToApply <= -1*MAX_PWM_ALLOWED)
+			pwmToApply = -1*MAX_PWM_ALLOWED;
+		
+		exec1.sine_commut_pwm = MOTOR_ORIENTATION*(int16_t)(pwmToApply);
+	#endif
+	
+	//dynamicUserData.pwm = MOTOR_ORIENTATION*(int16_t)(pwmToApply);
+	//dynamicUserData.mot_vol = v/10;
 }
 
 //Controls motor PWM duty cycle
@@ -259,7 +259,7 @@ void initDmaPwmCompare(void)
 
 	//DMA Configuration for DMA_PA:
 	DMA_PA_Chan = DMA_PA_DmaInitialize(DMA_PX_BYTES_PER_BURST, DMA_PX_REQUEST_PER_BURST, 
-	    HI16(DMA_PX_SRC_BASE), HI16(DMA_PX_DST_BASE));
+		HI16(DMA_PX_SRC_BASE), HI16(DMA_PX_DST_BASE));
 	DMA_PA_TD[0] = CyDmaTdAllocate();
 	CyDmaTdSetConfiguration(DMA_PA_TD[0], 2, DMA_PA_TD[0], DMA_PA__TD_TERMOUT_EN);
 	CyDmaTdSetAddress(DMA_PA_TD[0], LO16((uint32)&myPWMcompareA), LO16((uint32)PWM_A_COMPARE1_LSB_PTR));
@@ -268,7 +268,7 @@ void initDmaPwmCompare(void)
 	
 	//DMA Configuration for DMA_PB:
 	DMA_PB_Chan = DMA_PB_DmaInitialize(DMA_PX_BYTES_PER_BURST, DMA_PX_REQUEST_PER_BURST, 
-	    HI16(DMA_PX_SRC_BASE), HI16(DMA_PX_DST_BASE));
+		HI16(DMA_PX_SRC_BASE), HI16(DMA_PX_DST_BASE));
 	DMA_PB_TD[0] = CyDmaTdAllocate();
 	CyDmaTdSetConfiguration(DMA_PB_TD[0], 2, DMA_PB_TD[0], DMA_PB__TD_TERMOUT_EN);
 	CyDmaTdSetAddress(DMA_PB_TD[0], LO16((uint32)&myPWMcompareB), LO16((uint32)PWM_B_COMPARE1_LSB_PTR));
@@ -277,7 +277,7 @@ void initDmaPwmCompare(void)
 	
 	//DMA Configuration for DMA_PC:
 	DMA_PC_Chan = DMA_PC_DmaInitialize(DMA_PX_BYTES_PER_BURST, DMA_PX_REQUEST_PER_BURST, 
-	    HI16(DMA_PX_SRC_BASE), HI16(DMA_PX_DST_BASE));
+		HI16(DMA_PX_SRC_BASE), HI16(DMA_PX_DST_BASE));
 	DMA_PC_TD[0] = CyDmaTdAllocate();
 	CyDmaTdSetConfiguration(DMA_PC_TD[0], 2, DMA_PC_TD[0], DMA_PC__TD_TERMOUT_EN);
 	CyDmaTdSetAddress(DMA_PC_TD[0], LO16((uint32)&myPWMcompareC), LO16((uint32)PWM_C_COMPARE1_LSB_PTR));

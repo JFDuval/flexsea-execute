@@ -66,23 +66,23 @@ uint8_t gui_fsm_flag = DISABLED;
 //Initialize and enables all the peripherals
 void init_peripherals(void)
 {
-    //Magnetic encoder:
-	#ifdef USE_AS5047			
+	//Magnetic encoder:
+	#ifdef USE_AS5047
 	init_as5047();
 	#endif //USE_AS5047
-    
+	
 	//Motor control variables & peripherals:
 	init_motor();	
-    
+	
 	//Init Control:
 	init_ctrl_data_structure();
 	
 	//Timebases:
 	init_tb_timers();
-    
+	
 	#if(MOTOR_COMMUT == COMMUT_SINE) 
-    //Angle read timer
-    init_angle_timer();
+	//Angle read timer
+	init_angle_timer();
 	#endif //(MOTOR_COMMUT == COMMUT_SINE) 
 
 	//UART 2 - RS-485
@@ -107,7 +107,7 @@ void init_peripherals(void)
 	#endif
 	
 	//Enable Global Interrupts
-    CyGlobalIntEnable; 
+	CyGlobalIntEnable; 
 	
 	//I2C0 - 3V3, IMU & Expansion
 	#ifdef USE_I2C_0	
@@ -160,7 +160,7 @@ void init_peripherals(void)
 	set_led_rgb(1, 1, 0);
 	
 	//USB CDC
-	#ifdef USE_USB	
+	#ifdef USE_USB
 	init_usb();
 	#endif	//USE_USB
 	

@@ -48,11 +48,14 @@
 //Timers:
 volatile uint8_t t1_100us_flag = 0;
 volatile uint8_t t1_time_share = 0, t1_new_value = 0;
+volatile uint8_t activeFSM = FSMS_INACTIVE;
+volatile int8_t timingError[10] = {0};
+
 //int32_t angle_read_counter = 0, last_angle_read_gap = 0;
 
 //ADC:
-uint8_t adc_sar1_flag = 0;
-volatile uint8_t adc_delsig_flag = 0;
+volatile uint8_t adc_sar1_flag = 0;
+volatile uint8_t adc_delsig_flag = 0, adc_delsig_lastCh = 0;
 
 //****************************************************************************
 // Public Function(s)

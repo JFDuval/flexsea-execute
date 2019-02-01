@@ -300,7 +300,7 @@ inline int32 motor_current_pid_3(int32 wanted_curr, int32 measured_curr)
 	//Proportional term
 	volatile int32 curr_p = (int) ((ctrl.current.gain.I_KP * ctrl.current.error)>>8);
 	//Integral term
-	volatile int32 curr_i = (int)((ctrl.current.error_sum)>>8);
+	volatile int32 curr_i = (int)((ctrl.current.error_sum)>>13);
 	//Add differential term here if needed
 	//In both cases we divide by 100 to get a finer gain adjustement w/ integer values.
 
@@ -326,7 +326,7 @@ inline int32 motor_current_pid_3(int32 wanted_curr, int32 measured_curr)
 	
 	#endif
 		
-	#if(MOTOR_COMMUT == COMMUT_BLOCK)			
+	#if(MOTOR_COMMUT == COMMUT_BLOCK)
 		//Sign extracted from wanted_curr:
 		if(wanted_curr < 0)
 		{

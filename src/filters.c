@@ -56,125 +56,125 @@ int64_t bs_250[50] = {813,1607,2382,3139,3879,4603,5311,6005,6684,7351,8004,8645
 //filt is 1024 x raw in order to maintain precision
 //this function also shifts the arrays
 int32_t filt_array_10khz(int64_t * raw, int64_t * filt, int cut_off, int64_t new_raw)
-{  
-    
-    filt[1] = filt[0];
-    raw[1] = raw[0];
-    raw[0] = new_raw;
-    //ensure the cut-off frequency is inbetween 1 and 50 Hz
-    if (cut_off<1)
-    cut_off = 1;
-    else if (cut_off>50)
-    cut_off = 50;
-    
-    filt[0] = (bs_10k[cut_off-1]*(raw[1]+raw[0])-as_10k[cut_off-1]*filt[1])>>16;   
-    return (int32_t)(filt[0]>>10);
+{
+	
+	filt[1] = filt[0];
+	raw[1] = raw[0];
+	raw[0] = new_raw;
+	//ensure the cut-off frequency is inbetween 1 and 50 Hz
+	if (cut_off<1)
+	cut_off = 1;
+	else if (cut_off>50)
+	cut_off = 50;
+	
+	filt[0] = (bs_10k[cut_off-1]*(raw[1]+raw[0])-as_10k[cut_off-1]*filt[1])>>16;   
+	return (int32_t)(filt[0]>>10);
 }
 
 //Filters raw signal at cut_off frequency if sampled at 1 kHz
 //filt is 32 x raw in order to maintain precision
 //returns the filtered value at the correct scaling
 int32_t filt_array_1khz(int64_t * raw, int64_t * filt, int cut_off, int64_t new_raw)
-{  
-    filt[1] = filt[0];
-    raw[1] = raw[0];
-    raw[0] = new_raw;
-    //ensure the cut-off frequency is inbetween 1 and 50 Hz
-    if (cut_off<1)
-    cut_off = 1;
-    else if (cut_off>50)
-    cut_off = 50;
-    
-    filt[0] = (bs_1k[cut_off-1]*(raw[1]+raw[0])-as_1k[cut_off-1]*filt[1])>>15;   
-    return (int32_t)(filt[0]>>5);
+{
+	filt[1] = filt[0];
+	raw[1] = raw[0];
+	raw[0] = new_raw;
+	//ensure the cut-off frequency is inbetween 1 and 50 Hz
+	if (cut_off<1)
+	cut_off = 1;
+	else if (cut_off>50)
+	cut_off = 50;
+	
+	filt[0] = (bs_1k[cut_off-1]*(raw[1]+raw[0])-as_1k[cut_off-1]*filt[1])>>15;   
+	return (int32_t)(filt[0]>>5);
 }
 
 //Filters raw signal at cut_off frequency if sampled at 250 Hz
 //filt is 8 x raw in order to maintain precision
 //returns the filtered value at the correct scaling
 int32_t filt_array_250hz(int64_t * raw, int64_t * filt, int cut_off, int64_t new_raw)
-{  
-    filt[1] = filt[0];
-    raw[1] = raw[0];
-    raw[0] = new_raw;
-    //ensure the cut-off frequency is inbetween 1 and 50 Hz
-    if (cut_off<1)
-    cut_off = 1;
-    else if (cut_off>50)
-    cut_off = 50;
-    
-    filt[0] = (bs_250[cut_off-1]*(raw[1]+raw[0])-as_250[cut_off-1]*filt[1])>>13;   
-    return (int32_t)(filt[0]>>3);
+{
+	filt[1] = filt[0];
+	raw[1] = raw[0];
+	raw[0] = new_raw;
+	//ensure the cut-off frequency is inbetween 1 and 50 Hz
+	if (cut_off<1)
+	cut_off = 1;
+	else if (cut_off>50)
+	cut_off = 50;
+	
+	filt[0] = (bs_250[cut_off-1]*(raw[1]+raw[0])-as_250[cut_off-1]*filt[1])>>13;   
+	return (int32_t)(filt[0]>>3);
 }
 
 int get_median(int a, int b, int c)
 {
-    if ((a>=b && a<=c) || (a>=c && a<=b))
-    return a;
-    else if ((b>=a && b<=c) || (b>=c && b<=a))
-    return b;
-    
-    return c;
+	if ((a>=b && a<=c) || (a>=c && a<=b))
+	return a;
+	else if ((b>=a && b<=c) || (b>=c && b<=a))
+	return b;
+	
+	return c;
 }
 
 //Filters raw signal at cut_off frequency if sampled at 1 kHz
 //filt is 32 x raw in order to maintain precision
 //returns the filtered value at the correct scaling
 void filt_array_1khz_struct(struct filtvar_s *fv, int cut_off)
-{  
-    fv->filts[1] = fv->filts[0];
-    fv->raws[1] = fv->raws[0];
-    fv->raws[0] = fv->raw;
-    //ensure the cut-off frequency is inbetween 1 and 50 Hz
-    if (cut_off<1)
-    cut_off = 1;
-    else if (cut_off>50)
-    cut_off = 50;
-    
-    fv->filts[0] = (bs_1k[cut_off-1]*(fv->raws[1]+fv->raws[0])-as_1k[cut_off-1]*fv->filts[1])>>15;
-    fv->filt = (int32_t)(fv->filts[0]>>5);
+{
+	fv->filts[1] = fv->filts[0];
+	fv->raws[1] = fv->raws[0];
+	fv->raws[0] = fv->raw;
+	//ensure the cut-off frequency is inbetween 1 and 50 Hz
+	if (cut_off<1)
+	cut_off = 1;
+	else if (cut_off>50)
+	cut_off = 50;
+	
+	fv->filts[0] = (bs_1k[cut_off-1]*(fv->raws[1]+fv->raws[0])-as_1k[cut_off-1]*fv->filts[1])>>15;
+	fv->filt = (int32_t)(fv->filts[0]>>5);
 }
 
 
 int32 acc_reg_coef_1k_down[5] = {2915,-1458,-2915,-1458,2915};
 int32_t get_accl_1k_5samples_downsampled(struct diffarr_s * das)
 {
-    uint8 jj;
-    int32_t accsum;
-    int32_t initval = get_diffarr_elmnt(das,0);
-    accsum = 0;
-    
-    for (jj=0; jj<4; jj++)
-    {
-        accsum+= (get_diffarr_elmnt(das,28-jj*7)-initval)*acc_reg_coef_1k_down[jj];
-    }
-    return accsum*2;   
+	uint8 jj;
+	int32_t accsum;
+	int32_t initval = get_diffarr_elmnt(das,0);
+	accsum = 0;
+	
+	for (jj=0; jj<4; jj++)
+	{
+		accsum+= (get_diffarr_elmnt(das,28-jj*7)-initval)*acc_reg_coef_1k_down[jj];
+	}
+	return accsum*2;   
 }
 
 int32 vel_reg_coef_1k_5samples[5] = {-200,-100,0,100,200};
 int32_t get_vel_1k_5samples(struct diffarr_s * das)
 {
-    uint8 jj;
-    int32_t accsum;
-    accsum = 0;
-    int32_t initval = get_diffarr_elmnt(das,0);
-    for (jj=0; jj<4; jj++)
-    {
-        accsum+= (get_diffarr_elmnt(das,4-jj)-initval)*vel_reg_coef_1k_5samples[jj];
-    }
-    return accsum; // /10
+	uint8 jj;
+	int32_t accsum;
+	accsum = 0;
+	int32_t initval = get_diffarr_elmnt(das,0);
+	for (jj=0; jj<4; jj++)
+	{
+		accsum+= (get_diffarr_elmnt(das,4-jj)-initval)*vel_reg_coef_1k_5samples[jj];
+	}
+	return accsum; // /10
 }
 
 int32 vel_reg_coef_1k_5samples_downsampled[5] = {-286,-143,0,143,286};
 int32_t get_vel_1k_5samples_downsampled(struct diffarr_s * das)
 {
-    uint8 jj;
-    int32_t accsum;
-    accsum = 0;
-    int32_t initval = get_diffarr_elmnt(das,0);
-    for (jj=0; jj<4; jj++)
-    {
-        accsum+= (get_diffarr_elmnt(das,28-jj*7)-initval)*vel_reg_coef_1k_5samples_downsampled[jj];
-    }
-    return accsum/10; // /10
+	uint8 jj;
+	int32_t accsum;
+	accsum = 0;
+	int32_t initval = get_diffarr_elmnt(das,0);
+	for (jj=0; jj<4; jj++)
+	{
+		accsum+= (get_diffarr_elmnt(das,28-jj*7)-initval)*vel_reg_coef_1k_5samples_downsampled[jj];
+	}
+	return accsum/10; // /10
 }

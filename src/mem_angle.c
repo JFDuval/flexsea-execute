@@ -65,7 +65,7 @@ void init_eeprom(void)
 {
 	EEPROM_1_Start();
 	CyDelayUs(5);	//Needs 5us to start
-}	
+}
 
 //Saves an angle table to EEPROM - use that when calibrating
 void save_angles_to_eeprom(uint16_t *new_angles, eepromTable table)
@@ -224,7 +224,7 @@ void test_angle_eeprom(void)
 		if(test_w_data[cnt] != test_r_data[cnt])
 		{
 			error_cnt++;
-		}		
+		}
 	}
 	*/
 }

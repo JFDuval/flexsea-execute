@@ -35,7 +35,6 @@
 #include "main.h"
 #include <stdlib.h>
 #include "i2t-current-limit.h"
-#include "flexsea_user_structs.h"
 
 //****************************************************************************
 // Variable(s)
@@ -65,6 +64,7 @@ const uint16_t squared[256] = {0,1,4,9,16,25,36,49,64,81,100,121,144,
 int16_t currentSamples[I2T_SAMPLES];
 uint8_t currentSampleIndex = 0;
 uint8_t currentLimit = 0;
+uint8_t i2tPct = 0;
 
 //****************************************************************************
 // Private Function Prototype(s)
@@ -107,6 +107,7 @@ int32_t i2t_compute(void)
 	int32_t sampleAverage = 0;
 	uint16_t squaredCurrent = 0;
 	static uint32_t integral = 0;
+	uint32_t i2tPct_tmp = 0;
 	
 	//Average samples:
 	for(i = 0; i < I2T_SAMPLES; i++)
@@ -137,6 +138,10 @@ int32_t i2t_compute(void)
 		integral = 0;
 	}
 	
+	//How close are we to the limit?
+	i2tPct_tmp = (100 * integral) / I2T_LIMIT;
+	i2tPct = (uint8_t) i2tPct_tmp;
+	
 	//Last step: limits
 	if(integral < I2T_WARNING)
 	{
@@ -157,6 +162,9 @@ int32_t i2t_compute(void)
 		}
 	}
 }
+
+//Returns the %. 0% means no integral, 100% = we are at the limit.
+uint8_t i2t_get_percentage(void){return i2tPct;}
 
 //****************************************************************************
 // Private Function(s)

@@ -52,7 +52,7 @@ int16 adc_dma_array_buf[ADC2_BUF_LEN];
 volatile uint8_t current_sensing_flag = 0;
 
 int currPhase[8][3] = {{0,0,0}, {1,-1,0}, {-1,0,1}, {0,-1,1}, \
-                       {0,1,-1}, {1,0,-1}, {-1,1,0}, {0,0,0}};
+						{0,1,-1}, {1,0,-1}, {-1,1,0}, {0,0,0}};
 
 int32_t phase_a_zero = 0;
 int32_t phase_b_zero = 0;
@@ -86,21 +86,21 @@ void initCurrentSensing(void)
 	
 	#else	//(MOTOR_COMMUT == COMMUT_BLOCK)
 	
-	    //VDAC8: OpAmp VREF
+		//VDAC8: OpAmp VREF
 		VDAC8_1_Start();
 		
 		//Analog amplifiers & multiplexer(s):
-		Opamp_1_Start();    
-	        
-	    //ADC2: Motor current
-		ADC_SAR_2_Start();	
+		Opamp_1_Start();
+
+		//ADC2: Motor current
+		ADC_SAR_2_Start();
 		ADC_SAR_2_IRQ_Enable();
 		
 		CyDelay(1);
 		
 		adc_sar2_dma_config();
-		isr_sar2_dma_Start();    
-	    CyDelay(1);
+		isr_sar2_dma_Start();
+		CyDelay(1);
 	
 	#endif
 }
@@ -113,8 +113,8 @@ void adc_sar2_dma_config(void)
 	
 	#if((MOTOR_COMMUT == COMMUT_BLOCK) && (CURRENT_SENSING == CS_LEGACY))
 
-		//5 transfers per ISR (10 bytes):	
-		xferLen = 10;	
+		//5 transfers per ISR (10 bytes):
+		xferLen = 10;
 	
 	#else
 	
@@ -123,9 +123,9 @@ void adc_sar2_dma_config(void)
 	
 	#endif
 	
-	//X transfers per ISR (2X bytes):	
+	//X transfers per ISR (2X bytes):
 	DMA_1_Chan = DMA_1_DmaInitialize(DMA_1_BYTES_PER_BURST, DMA_1_REQUEST_PER_BURST, 
-	    HI16(DMA_1_SRC_BASE), HI16(DMA_1_DST_BASE));
+		HI16(DMA_1_SRC_BASE), HI16(DMA_1_DST_BASE));
 	DMA_1_TD[0] = CyDmaTdAllocate();
 	CyDmaTdSetConfiguration(DMA_1_TD[0], xferLen, DMA_1_TD[0], DMA_1__TD_TERMOUT_EN | TD_INC_DST_ADR);
 
@@ -230,27 +230,27 @@ void update_current_arrays(void)
 
 void set_current_zero()
 {
-    static int32_t ii =0;
-    static int32_t a_sum = 0, b_sum = 0, c_sum = 0;
-    
-    ii++;
-    b_sum += (int32_t)adc_dma_array_buf[2];
-    c_sum += (int32_t)adc_dma_array_buf[0];
-    a_sum += (int32_t)adc_dma_array_buf[1];    
-    
-    phase_a_zero = (a_sum+ii/2)/ii;
-    phase_b_zero = (b_sum+ii/2)/ii;
-    phase_c_zero = (c_sum+ii/2)/ii;    
+	static int32_t ii =0;
+	static int32_t a_sum = 0, b_sum = 0, c_sum = 0;
+	
+	ii++;
+	b_sum += (int32_t)adc_dma_array_buf[2];
+	c_sum += (int32_t)adc_dma_array_buf[0];
+	a_sum += (int32_t)adc_dma_array_buf[1];
+	
+	phase_a_zero = (a_sum+ii/2)/ii;
+	phase_b_zero = (b_sum+ii/2)/ii;
+	phase_c_zero = (c_sum+ii/2)/ii;
 }
 
 void get_phase_currents(int32_t * phase_curs)
-{       
-    phase_curs[1] = (adc_dma_array_buf[2]-phase_b_zero)*16;   
-    phase_curs[2] = (adc_dma_array_buf[0]-phase_c_zero)*16;
-    phase_curs[0] = (adc_dma_array_buf[1]-phase_a_zero)*16;   
+{
+	phase_curs[1] = (adc_dma_array_buf[2]-phase_b_zero)*16;
+	phase_curs[2] = (adc_dma_array_buf[0]-phase_c_zero)*16;
+	phase_curs[0] = (adc_dma_array_buf[1]-phase_a_zero)*16;
 }
 
 void adc_sar2_dma_reinit(void)
 {
-CyDmaChSetInitialTd(DMA_1_Chan, DMA_1_TD[0]);
+	CyDmaChSetInitialTd(DMA_1_Chan, DMA_1_TD[0]);
 }

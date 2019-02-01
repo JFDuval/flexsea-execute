@@ -298,7 +298,7 @@ void dma_2_config(void)
 	#define DMA_2_SRC_BASE (CYDEV_PERIPH_BASE)
 	#define DMA_2_DST_BASE (CYDEV_SRAM_BASE)
 	DMA_2_Chan = DMA_2_DmaInitialize(DMA_2_BYTES_PER_BURST, DMA_2_REQUEST_PER_BURST, 
-	    HI16(DMA_2_SRC_BASE), HI16(DMA_2_DST_BASE));
+		HI16(DMA_2_SRC_BASE), HI16(DMA_2_DST_BASE));
 	DMA_2_TD[0] = CyDmaTdAllocate();
 	CyDmaTdSetConfiguration(DMA_2_TD[0], DMA2_BYTES_PER_XFER, DMA_2_TD[0], DMA_2__TD_TERMOUT_EN | TD_INC_DST_ADR);
 	CyDmaTdSetAddress(DMA_2_TD[0], LO16((uint32)ADC_DelSig_1_DEC_SAMP_PTR), LO16((uint32)adc_delsig_dma_array));

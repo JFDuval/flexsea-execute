@@ -69,7 +69,9 @@ uint8_t toggle_wdclk = 0;
 
 //****************************************************************************
 // Private Function Prototype(s):
-//****************************************************************************	
+//****************************************************************************
+
+uint16_t computeFsmStatus(volatile int8_t *timingError);
 
 //****************************************************************************
 // Public Function(s)
@@ -265,8 +267,10 @@ void mainFSM9(void)
 	//1s timebase:
 	if(timebase_1s())
 	{
+		#ifdef USE_USB
 		//Tries to connect to USB:
 		usbRuntimeConnect();
+		#endif
 	}
 }
 
@@ -274,7 +278,7 @@ void mainFSM9(void)
 //================
 
 void mainFSM10kHz(void)
-{		
+{
 	//FlexSEA Network Communication
 	#ifdef USE_COMM
 		
@@ -320,3 +324,25 @@ void mainFSMasynchronous(void)
 	toggle_wdclk ^= 1;
 	WDCLK_Write(toggle_wdclk);
 }
+
+uint16_t computeFsmStatus(volatile int8_t *timingError)
+{
+	int8_t mostOffendingFSM = -1;
+	uint8_t numOffenses = 0;
+	int i;
+	for(i = 0; i < 10; ++i)
+	{
+		if(timingError[i] > numOffenses)
+		{
+			mostOffendingFSM = i;
+			numOffenses = timingError[i];
+		}
+	}
+
+	uint16_t fsmStatus = 0;
+	if(mostOffendingFSM != -1)
+		fsmStatus = (mostOffendingFSM << 4) | (numOffenses & 0x0F);
+
+	return fsmStatus;
+}
+

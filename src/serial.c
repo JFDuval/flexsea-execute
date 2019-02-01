@@ -208,7 +208,7 @@ static void init_dma_3(void)
 	#define DMA_3_DST_BASE 				(CYDEV_SRAM_BASE)
 
 	DMA_3_Chan = DMA_3_DmaInitialize(DMA_3_BYTES_PER_BURST, DMA_3_REQUEST_PER_BURST, 
-	    HI16(DMA_3_SRC_BASE), HI16(DMA_3_DST_BASE));
+		HI16(DMA_3_SRC_BASE), HI16(DMA_3_DST_BASE));
 	DMA_3_TD[0] = CyDmaTdAllocate();
 	CyDmaTdSetConfiguration(DMA_3_TD[0], 48, DMA_3_TD[0], DMA_3__TD_TERMOUT_EN | TD_INC_DST_ADR);
 	CyDmaTdSetAddress(DMA_3_TD[0], LO16((uint32)UART_2_RXDATA_PTR), LO16((uint32)uart_dma_rx_buf));
@@ -225,7 +225,7 @@ static void init_dma_4(void)
 	#define DMA_4_DST_BASE 				(CYDEV_PERIPH_BASE)
 	
 	DMA_4_Chan = DMA_4_DmaInitialize(DMA_4_BYTES_PER_BURST, DMA_4_REQUEST_PER_BURST, 
-	    HI16(DMA_4_SRC_BASE), HI16(DMA_4_DST_BASE));
+		HI16(DMA_4_SRC_BASE), HI16(DMA_4_DST_BASE));
 	DMA_4_TD[0] = CyDmaTdAllocate();
 	CyDmaTdSetConfiguration(DMA_4_TD[0], 48, CY_DMA_DISABLE_TD, TD_TERMIN_EN | DMA_4__TD_TERMOUT_EN | TD_INC_SRC_ADR | TD_AUTO_EXEC_NEXT);
 	CyDmaTdSetAddress(DMA_4_TD[0], LO16((uint32)uart_dma_tx_buf), LO16((uint32)UART_2_TXDATA_PTR));

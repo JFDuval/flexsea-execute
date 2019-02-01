@@ -31,7 +31,7 @@
 
 #include "calibration_tools.h"
 
-uint8_t calibrationFlags = 0;
+uint8_t calibrationFlags = 0, calibrationNew = 0;
 
 inline uint8_t isRunningCalibrationProcedure()
 {

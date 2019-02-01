@@ -44,8 +44,13 @@
 	
 extern volatile uint8_t t1_100us_flag;
 extern volatile uint8_t t1_time_share, t1_new_value;
+extern volatile uint8_t activeFSM;
+extern volatile int8_t timingError[10];
+#define FSMS_INACTIVE UINT8_MAX
+// MACRO for incrementing and limiting counter values (making them restart at 0 after hitting a value)
+#define TICK_COUNTER(x, lim) do { if((++x) >= lim) x = 0; } while(0)
 	
-extern uint8_t adc_sar1_flag;	
+extern volatile uint8_t adc_sar1_flag;	
 extern volatile uint8_t adc_delsig_flag;
 
 //extern uint16 last_as5047_word;	    
