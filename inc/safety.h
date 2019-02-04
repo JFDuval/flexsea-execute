@@ -47,9 +47,9 @@ struct scop
 	uint16 v_vb, v_vg, v_3v3;
 	uint8_t temperature;
 	uint8_t status1, status2;
-    int32_t v_vb_mv;
+	int32_t v_vb_mv;
 };
-	
+
 //****************************************************************************
 // Public Function Prototype(s):
 //****************************************************************************
@@ -64,7 +64,7 @@ void overtemp_error(uint8_t *eL1, uint8_t *eL2);
 
 void safety_cop_comm_test_blocking(void);
 void wdclk_test_blocking(void);
-uint8_t criticalError(void);
+uint8_t criticalError(uint8_t reset);
 
 uint8_t I2C_1_MasterWriteByteTimeOut(uint8_t theByte, uint32 timeout);
 

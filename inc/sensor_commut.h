@@ -44,10 +44,11 @@
 extern int findingpoles;
 
 extern uint8_t measure_motor_resistance;
+extern volatile uint8_t badFindPoles;
 
-extern int16 phaseAcoms[2048]; 
-extern int16 phaseBcoms[2048]; 
-extern int16 phaseCcoms[2048]; 
+extern int16 phaseAcoms[2048];
+extern int16 phaseBcoms[2048];
+extern int16 phaseCcoms[2048];
 
 extern int32_t PWM_A_Value;
 extern int32_t PWM_B_Value;

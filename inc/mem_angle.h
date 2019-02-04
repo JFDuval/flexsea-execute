@@ -48,7 +48,7 @@ FLASH so the value of this code is very limited...
 
 //****************************************************************************
 // Include(s)
-//****************************************************************************		
+//****************************************************************************
 	
 #include "main.h"
 	
@@ -58,14 +58,14 @@ FLASH so the value of this code is very limited...
 
 //****************************************************************************
 // Definition(s):
-//****************************************************************************	
+//****************************************************************************
 
 //EEPROM:
 #define EE_ROW_LEN_WORD				8
 #define EE_ROW_LEN_BYTES			(EE_ROW_LEN_WORD*2)
 //Commutation:
 #define EE_ANGLE_COMM_START			0
-#define EE_ANGLE_COMM_LEN			16
+#define EE_ANGLE_COMM_LEN			19
 //Joint:
 #define EE_ANGLE_JOINT_START		20
 #define EE_ANGLE_JOINT_LEN			40

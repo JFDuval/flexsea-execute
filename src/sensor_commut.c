@@ -41,6 +41,7 @@
 #include "user-ex.h"
 #include "control.h"
 #include "flexsea_user_structs.h"
+#include "main_fsm.h"
 
 //****************************************************************************
 // Variable(s)
@@ -52,6 +53,7 @@ uint16 anglemap[128];
 uint16 temp_anglemap[128];
 uint8_t measure_motor_resistance = 0;
 int i2t_flag = 0;
+volatile uint8_t badFindPoles = 0;
 
 int16_t phaseAcoms[2048];
 int16_t phaseBcoms[2048];
@@ -69,6 +71,7 @@ int16 phaseCcoscoms[2048];
 // Private Function Prototype(s):
 //****************************************************************************
 
+static void arePolesGood(void);
 
 //****************************************************************************
 // Public Function(s)
@@ -112,69 +115,69 @@ void find_poles(void)
 	static int32 phasecounter = 0;
 	static int32 phase = 0, numsteps = NUMPOLES + 5;
 	static int32_t angsum = 0;
-	static int32_t angsumcntr = 0;	
+	static int32_t angsumcntr = 0;
 	
 	static int32_t p0v, p1v, p2v;
 		
 	counter++;
 	if(counter >= pausetime)
-	{ 
+	{
 		counter = 0;
 		phasecounter++;
 	}
 
 	phase = phasecounter%6;
 	
-	if (phasecounter <= numsteps)
+	if(phasecounter <= numsteps)
 	{
 		findingpoles = 1;
 		
 		switch (phase)
 		{
 			case 0:
-					p0v = pwmhigh;
-					p1v = pwmlow;
-					p2v = pwmlow;
+				p0v = pwmhigh;
+				p1v = pwmlow;
+				p2v = pwmlow;
 				break;
 			case 1:
-					p0v = pwmhigh;
-					p1v = pwmlow;
-					p2v = pwmhigh;
+				p0v = pwmhigh;
+				p1v = pwmlow;
+				p2v = pwmhigh;
 				break;
 			case 2:
-					p0v = pwmlow;
-					p1v = pwmlow;
-					p2v = pwmhigh;
+				p0v = pwmlow;
+				p1v = pwmlow;
+				p2v = pwmhigh;
 				break;
 			case 3:
-					p0v = pwmlow;
-					p1v = pwmhigh;
-					p2v = pwmhigh;
+				p0v = pwmlow;
+				p1v = pwmhigh;
+				p2v = pwmhigh;
 				break;
 			case 4:
-					p0v = pwmlow;
-					p1v = pwmhigh;
-					p2v = pwmlow;
+				p0v = pwmlow;
+				p1v = pwmhigh;
+				p2v = pwmlow;
 				break;
 			case 5:
-					p0v = pwmhigh;
-					p1v = pwmhigh;
-					p2v = pwmlow;
+				p0v = pwmhigh;
+				p1v = pwmhigh;
+				p2v = pwmlow;
 				break;
 		}
 		setDmaPwmCompare(p0v, p1v, p2v);
 		
-		if (counter>pausetime/2)
+		if(counter>pausetime/2)
 		{
 			angsum += (as5047.raw_angs_clks.curval+32768);
 			angsumcntr++;
 		}
 		
-		if (counter == (pausetime-1))
+		if(counter == (pausetime-1))
 		{
 			//temp_anglemap[phasecounter%NUMPOLES] = as5047.ang_abs_clks;
 			temp_anglemap[phasecounter%NUMPOLES] = ((angsum+angsumcntr/2)/angsumcntr)%16384;  
-			if (temp_anglemap[phasecounter%NUMPOLES]<mincomang)
+			if(temp_anglemap[phasecounter%NUMPOLES]<mincomang)
 			{
 				mincomang = temp_anglemap[phasecounter%NUMPOLES];
 				mincomangindx = phasecounter%NUMPOLES;
@@ -184,9 +187,9 @@ void find_poles(void)
 			angsumcntr = 0;
 		}
 	}
-	else 
+	else
 	{
-		if (findingpoles == 1)
+		if(findingpoles == 1)
 		{
 			setDmaPwmCompare(PWM_MAX,PWM_MAX,PWM_MAX);
 			
@@ -208,10 +211,13 @@ void find_poles(void)
 			anglemap[126] = initpole;
 			anglemap[127] = 1;
 			
+			arePolesGood();
+			
 			#ifdef USE_EEPROM
 			
 			save_angles_to_eeprom(anglemap, COMMUTATION);
-			load_eeprom_to_angles();	 
+			load_eeprom_to_angles();
+			criticalError(1);	//Clear I2t error
 			
 			#endif
 			
@@ -248,7 +254,7 @@ void load_eeprom_to_angles(void)
 		phaseBcoscoms[ii>>3] = (outs1[4]+outs2[4])/2;
 		phaseCcoscoms[ii>>3] = (outs1[5]+outs2[5])/2;
 		ii += 8;
-	}   
+	}
 }
 
 //ang goes from 0 to 16384
@@ -304,21 +310,45 @@ void fill_comm_tables(int32 ang, int16_t * outs)
 		rel_ang = ang-anglemap[indx]+period*((indx+shiftmap)%6);
 		
 	}
-	six_period = period*6;	
+	six_period = period*6;
 	
 	outs[0] = (get_sin_profile((rel_ang),six_period));
 	outs[1] = (get_sin_profile((rel_ang+period*2),six_period));
-	outs[2] = (get_sin_profile((rel_ang+period*4),six_period));	
+	outs[2] = (get_sin_profile((rel_ang+period*4),six_period));
 	outs[3] = (get_cos_profile((rel_ang),six_period));
 	outs[4] = (get_cos_profile((rel_ang+period*2),six_period));
 	outs[5] = (get_cos_profile((rel_ang+period*4),six_period));
+}
 
+static void arePolesGood(void)
+{
+	int ii = 1;
+	int32_t maxEncDif = 0, minEncDif = 0;
+	int32_t acceptPercDif = 50; 
+	
+	badFindPoles = 0;
+	
+	maxEncDif = (MAX_ENC/NUMPOLES*(100+acceptPercDif))/100;
+	minEncDif = (MAX_ENC/NUMPOLES*(100-acceptPercDif))/100;
+	while (ii<=(NUMPOLES-1))
+	{
+		if ((anglemap[ii] - anglemap[ii-1]) > maxEncDif || (anglemap[ii] - anglemap[ii-1]) < minEncDif)
+		{
+			badFindPoles = 1;
+			break;
+		}
+		ii++;
+	}
+	if (anglemap[0] > maxEncDif || anglemap[NUMPOLES-1] < MAX_ENC-maxEncDif || anglemap[NUMPOLES-1] > MAX_ENC)
+	{
+		badFindPoles = 1;
+	}
 }
 
 //ang is the current angle of the motor, pwm ranges from -1024 to 1024
 //ang should be from 0 to 2048
 
-int32_t induc_amp = 0;  
+int32_t induc_amp = 0;
 void sensor_sin_commut(int16 ang, int32 pwm)
 {
 	#if(MOTOR_COMMUT == COMMUT_SINE)
@@ -327,7 +357,7 @@ void sensor_sin_commut(int16 ang, int32 pwm)
 	
 	if (findingpoles == 0)
 	{
-		if (criticalError())
+		if(criticalError(0) || suppressMotor || badFindPoles)
 		{
 			//All PWM to 0 - Maximum damping
 			PWM_A_Value=PWM_AMP;
@@ -384,9 +414,8 @@ void sensor_sin_commut(int16 ang, int32 pwm)
 // Private Function(s)
 //****************************************************************************
 
-
 void calc_motor_L(void)
-{  
+{
 	static struct diffarr_s currs;
 	static int32_t mot_induc;
 	

@@ -64,7 +64,7 @@ void setDmaPwmCompare(uint16_t a, uint16_t b, uint16_t c);
 
 //PWM limits
 #define MAX_PWM						1000
-#define MIN_PWM						-MAX_PWM
+#define MIN_PWM						(-MAX_PWM)
 #define P1_DEADTIME					30					//Make sure that it matches the hardware setting!
 #define PWM1DC(x)					MAX(x, (P1_DEADTIME+2))
 #define PWM2DC(x)					MAX(((x - P1_DEADTIME)>>1), 10)

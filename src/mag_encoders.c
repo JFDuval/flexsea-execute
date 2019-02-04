@@ -46,16 +46,16 @@
 
 int32 angtimer_read = 65000;
 
-struct as504x_s as5047, as5048b;
+volatile struct as504x_s as5047, as5048b;
 
 //Magnetic encoder, AS5047:
 uint16 spidata_mosi[WORDS_IN_FRAME] = {0,0,0,0,0,0,0};
-uint16 spidata_miso[WORDS_IN_FRAME] = {0,0,0,0,0,0,0};
+volatile uint16 spidata_miso[WORDS_IN_FRAME] = {0,0,0,0,0,0,0};
 uint16 spidata_mosi2[WORDS_IN_FRAME];
 uint16 as5047_angle = 0;
 volatile uint8_t spi_isr_state = 0;
 volatile uint16 as5047_empty_read = 0;
-int32_t spi_read_flag = 0;
+volatile int32_t spi_read_flag = 0;
 
 //Magnetic encoder, AS5048B:
 uint8_t as5048b_bytes[10] = {0,0,0,0,0,0,0,0,0,0};

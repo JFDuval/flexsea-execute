@@ -289,7 +289,7 @@ inline int32 motor_current_pid_3(int32 wanted_curr, int32 measured_curr)
 	
 	//Error and integral of errors:
 	ctrl.current.error = (wanted_curr - measured_curr);					//Actual error
-	ctrl.current.error_sum = ctrl.current.error_sum + ctrl.current.gain.I_KI*ctrl.current.error;	//Cumulative error
+	ctrl.current.error_sum += ctrl.current.error;	//Cumulative error
 	
 	//Saturate cumulative error
 	if(ctrl.current.error_sum >= MAX_CUM_CURRENT_ERROR)
@@ -302,7 +302,7 @@ inline int32 motor_current_pid_3(int32 wanted_curr, int32 measured_curr)
 	//Integral term
 	volatile int32 curr_i = (int)((ctrl.current.error_sum)>>13);
 	//Add differential term here if needed
-	//In both cases we divide by 100 to get a finer gain adjustement w/ integer values.
+	//In both cases we divide to get a finer gain adjustement w/ integer values.
 
 	//Output
 	#ifdef USE_FEED_FORWARD
@@ -313,15 +313,6 @@ inline int32 motor_current_pid_3(int32 wanted_curr, int32 measured_curr)
 	
 	#if(MOTOR_COMMUT == COMMUT_SINE) 
 
-        /*
-	    //sine_commut_pwm should be from 1024 to -1024
-	    if (curr_pwm > 1023)
-	    curr_pwm = 1023;
-	    if (curr_pwm < -1023)
-	    curr_pwm = -1023;
-	    exec1.sine_commut_pwm = MOTOR_ORIENTATION*curr_pwm;
-        */
-        
         motor_open_speed_1(curr_pwm);
 	
 	#endif

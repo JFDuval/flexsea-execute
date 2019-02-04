@@ -83,17 +83,14 @@ void init_motor(void)
 	
 	#else	//(MOTOR_COMMUT == COMMUT_BLOCK)
 	
-	initCurrentSensing();  
+	initCurrentSensing();
 		
-	//Start 3 PWM at 0%  
+	//Start 3 PWM at 0%
 	PWM_A_Start();
-	//PWM_A_WriteCompare1(0);		//Edge: Compare1, Center: Compare
 	PWM_A_WriteCompare(PWM_AMP);
 	PWM_B_Start();
-	//PWM_B_WriteCompare1(0);
 	PWM_B_WriteCompare(PWM_AMP);
 	PWM_C_Start();
-	//PWM_C_WriteCompare1(0);
 	PWM_C_WriteCompare(PWM_AMP);
 	setDmaPwmCompare(PWM_AMP,PWM_AMP,PWM_AMP);
 	initDmaPwmCompare();

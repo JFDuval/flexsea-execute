@@ -54,7 +54,7 @@ void adc_sar2_dma_reinit(void);
 
 //Motor current ADC:
 #define ADC2_BUF_LEN				9
-#define ADC2_BUF_LEN_3RD	        3
+#define ADC2_BUF_LEN_3RD			3
 
 //DMA ADC SAR 2
 #define DMA_1_BYTES_PER_BURST 		2

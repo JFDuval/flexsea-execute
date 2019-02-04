@@ -53,18 +53,15 @@ uint8_t getBoardUpID(void);
 uint8_t getBoardSubID(uint8_t sub, uint8_t idx);
 uint8_t getSlaveCnt(uint8_t sub);
 
+uint8_t getDeviceId();
+uint8_t getDeviceType();
+
 //****************************************************************************
 // Definition(s):
 //****************************************************************************
 
 //<FlexSEA User>
 //==============
-
-//Board type: define as a global symbol. List of options:
-//(and make sure it matches with board_id!)
-//#define BOARD_TYPE_FLEXSEA_PLAN
-//#define BOARD_TYPE_FLEXSEA_MANAGE
-//#define BOARD_TYPE_FLEXSEA_EXECUTE
 
 //How many slave busses?
 #define COMM_SLAVE_BUS				2

@@ -183,8 +183,8 @@ void isr_spi_tx_Interrupt_InterruptCallback()
 
 	//static volatile uint16 frame_errors = 0, parity_errors = 0, man_test = 0;
 	volatile uint8_t tx_status_isr = 0;
-    static uint16 counter = 0;
-    static uint8 velcounter = 0;
+	static uint16 counter = 0;
+	static uint8 velcounter = 0;
 	
 	//Read status to clear flag:
 	tx_status_isr = SPIM_1_ReadTxStatus();
@@ -202,33 +202,33 @@ void isr_spi_tx_Interrupt_InterruptCallback()
 	{
 		//Transfer complete, decode answer:
 		spidata_miso[spi_isr_state] = SPIM_1_ReadRxData();
-    	as5047_angle = (spidata_miso[spi_isr_state] & 0x3FFF);
-        spi_read_flag = 1;
-        update_as504x_absang(as5047_angle, &as5047);
-        sensor_sin_commut(as5047.ang_comp_clks>>3, exec1.sine_commut_pwm);
+		as5047_angle = (spidata_miso[spi_isr_state] & 0x3FFF);
+		spi_read_flag = 1;
+		update_as504x_absang(as5047_angle, &as5047);
+		sensor_sin_commut(as5047.ang_comp_clks>>3, exec1.sine_commut_pwm);
 
-        if (update_current_flag)
-        {
-    	update_current_arrays();
-        update_current_flag = 0;
+		if (update_current_flag)
+		{
+		update_current_arrays();
+		update_current_flag = 0;
 		}
-        
-        if (velcounter>=20)
-        {
-            //Encoder velocity estimation:
-            //update_as504x_contang(&as5047);
-	        update_as504x_vel(&as5047);
-            velcounter = 0;           
-        }
-        velcounter++;
+		
+		if (velcounter>=20)
+		{
+			//Encoder velocity estimation:
+			//update_as504x_contang(&as5047);
+			update_as504x_vel(&as5047);
+			velcounter = 0;		   
+		}
+		velcounter++;
 
-	    if (counter<20000)
-        {
-            if (counter>14000){set_current_zero();}
-            counter++;
-        }
-        
-        /* Partially developped error testing code:
+		if (counter<20000)
+		{
+			if (counter>14000){set_current_zero();}
+			counter++;
+		}
+		
+		/* Partially developped error testing code:
 		
 		//Error in last command frame?
 		if(spidata_miso[spi_isr_state] & AS5047_ERR_FRAME)
@@ -244,10 +244,10 @@ void isr_spi_tx_Interrupt_InterruptCallback()
 		}
 		//Wrong parity?		
 		//...
-		*/        
+		*/		
 	}   
 	#endif	//USE_AS5047
-    //EX2_Write(0);
+	//EX2_Write(0);
 }
 
 //Interrupt triggers when PWM A reloads
@@ -256,7 +256,7 @@ void isr_mot_Interrupt_InterruptCallback()
 	//Encoder, sine commutation:
 	#if(MOTOR_COMMUT == COMMUT_SINE) 
 
-	    #if(ENC_COMMUT == ENC_AS5047)
+		#if(ENC_COMMUT == ENC_AS5047)
 			//Start reading, result via ISR 
 			as5047_read_single_isr(AS5047_REG_ANGLECOM); 
 		#endif //ENC_AS5047

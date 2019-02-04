@@ -66,6 +66,8 @@ uint8_t gui_fsm_flag = DISABLED;
 //Initialize and enables all the peripherals
 void init_peripherals(void)
 {
+	CyDelay(5);
+	
 	//Magnetic encoder:
 	#ifdef USE_AS5047
 	init_as5047();

@@ -56,25 +56,25 @@ uint8_t safety_cop_data[24] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 //Update the global variables from the array
 void decode_psoc4_values(uint8_t *psoc4_data)
 {
-    
-    static int32_t bat_volt_counter = 0;
-    if (psoc4_data[MEM_R_VB_SNS]>=safety_cop.v_vb) //all of this complicatedness is because the bat_voltage spikes down when under current
-    {
-        safety_cop.v_vb = psoc4_data[MEM_R_VB_SNS];
-        bat_volt_counter = 0;
-    }
-    else
-    {
-        bat_volt_counter++;
-        if (bat_volt_counter>50)
-        {
-            safety_cop.v_vb--;
-            bat_volt_counter=0;
-        }
-    }
-    safety_cop.v_vb_mv =  (int32_t)safety_cop.v_vb*176+9991;
-    //dynamicUserData.bat_volt = (uint16_t)(safety_cop.v_vb_mv);
-    
+	
+	static int32_t bat_volt_counter = 0;
+	if (psoc4_data[MEM_R_VB_SNS]>=safety_cop.v_vb) //all of this complicatedness is because the bat_voltage spikes down when under current
+	{
+		safety_cop.v_vb = psoc4_data[MEM_R_VB_SNS];
+		bat_volt_counter = 0;
+	}
+	else
+	{
+		bat_volt_counter++;
+		if (bat_volt_counter>50)
+		{
+			safety_cop.v_vb--;
+			bat_volt_counter=0;
+		}
+	}
+	safety_cop.v_vb_mv =  (int32_t)safety_cop.v_vb*176+9991;
+	//dynamicUserData.bat_volt = (uint16_t)(safety_cop.v_vb_mv);
+	
 	//safety_cop.v_vb = psoc4_data[MEM_R_VB_SNS];
 	safety_cop.v_vg = psoc4_data[MEM_R_VG_SNS];
 	safety_cop.v_3v3 = psoc4_data[MEM_R_3V3_SNS];
@@ -140,7 +140,7 @@ int safety_cop_read(uint8_t internal_reg_addr, uint8_t *pData, uint16 length)
 	//I2C_1_MasterClearStatus();
 	
 	//Start, address, Write mode
-	status = I2C_1_MasterSendStart(SCOP_I2C_ADDR, 0);		
+	status = I2C_1_MasterSendStart(SCOP_I2C_ADDR, 0);
 	if(status != I2C_1_MSTR_NO_ERROR)
 		return 1;
 	
@@ -264,68 +264,68 @@ void overtemp_error(uint8_t *eL1, uint8_t *eL2)
 //timeout is in us
 uint8_t I2C_1_MasterWriteByteTimeOut(uint8_t theByte, uint32 timeout)
 {
-    uint8_t errStatus;
+	uint8_t errStatus;
 	uint32 t = 0;	//For the timeout
 
-    errStatus = I2C_1_MSTR_NOT_READY;
+	errStatus = I2C_1_MSTR_NOT_READY;
 
-    /* Check if START condition was generated */
-    if(I2C_1_CHECK_MASTER_MODE(I2C_1_MCSR_REG))
-    {
-        I2C_1_DATA_REG = theByte;                        /* Write DATA register */
+	/* Check if START condition was generated */
+	if(I2C_1_CHECK_MASTER_MODE(I2C_1_MCSR_REG))
+	{
+		I2C_1_DATA_REG = theByte;						/* Write DATA register */
 		t = 0;
 		
 		
-        //I2C_1_TRANSMIT_DATA_MANUAL_TIMEOUT;                      /* Set transmit mode */
+		//I2C_1_TRANSMIT_DATA_MANUAL_TIMEOUT;					  /* Set transmit mode */
 		
-        I2C_1_TRANSMIT_DATA;								
-        while(I2C_1_CHECK_BYTE_COMPLETE(I2C_1_CSR_REG))		
-        {													
-            /* Wait when byte complete is cleared */		
-			t++;											
-			if(t > timeout)									
-				break;										
-			else											
-				CyDelayUs(1);								
-        }	
+		I2C_1_TRANSMIT_DATA;
+		while(I2C_1_CHECK_BYTE_COMPLETE(I2C_1_CSR_REG))
+		{
+			/* Wait when byte complete is cleared */
+			t++;
+			if(t > timeout)
+				break;
+			else
+				CyDelayUs(1);
+		}	
 		
 		
-        I2C_1_state = I2C_1_SM_MSTR_WR_DATA;  /* Set state WR_DATA */
+		I2C_1_state = I2C_1_SM_MSTR_WR_DATA;  /* Set state WR_DATA */
 
-        /* Make sure the last byte has been transfered first */
+		/* Make sure the last byte has been transfered first */
 		t = 0;
-        while(I2C_1_WAIT_BYTE_COMPLETE(I2C_1_CSR_REG))
-        {
+		while(I2C_1_WAIT_BYTE_COMPLETE(I2C_1_CSR_REG))
+		{
 			/*
-           //Wait for byte to be written
+		   //Wait for byte to be written
 			t++;
 			if(t > timeout)	
 				break;
 			else
 				CyDelayUs(1);
 			*/
-        }
+		}
 
 
-        if(I2C_1_CHECK_DATA_ACK(I2C_1_CSR_REG))
-        {
-            I2C_1_state = I2C_1_SM_MSTR_HALT;     /* Set state to HALT */
-            errStatus = I2C_1_MSTR_NO_ERROR;                 /* The LRB was ACKed */
-        }
-        else
-        {
-            I2C_1_state = I2C_1_SM_MSTR_HALT;     /* Set state to HALT */
-            errStatus = I2C_1_MSTR_ERR_LB_NAK;               /* The LRB was NACKed */
-        }
-    }
+		if(I2C_1_CHECK_DATA_ACK(I2C_1_CSR_REG))
+		{
+			I2C_1_state = I2C_1_SM_MSTR_HALT;	 /* Set state to HALT */
+			errStatus = I2C_1_MSTR_NO_ERROR;				 /* The LRB was ACKed */
+		}
+		else
+		{
+			I2C_1_state = I2C_1_SM_MSTR_HALT;	 /* Set state to HALT */
+			errStatus = I2C_1_MSTR_ERR_LB_NAK;			   /* The LRB was NACKed */
+		}
+	}
 
-    return(errStatus);
+	return(errStatus);
 }
 
 //This function gets called by the lowest-level PWM functions. If it returns an
 //error, it will force the output to a 0% duty cycle. It will apply no power, 
 //and maximum damping to the motor.
-uint8_t criticalError(void)
+uint8_t criticalError(uint8_t reset)
 {
 	static uint8_t latchedOutput = 0;
 	
@@ -339,6 +339,12 @@ uint8_t criticalError(void)
 	}
 		
 	#endif	//USE_I2T_LIMIT
+	
+	//Manual reset:
+	if(reset)
+	{
+		latchedOutput = 0;
+	}
 	
 	//Include other safety detections here:
 	//...

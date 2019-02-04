@@ -65,12 +65,12 @@ void update_as504x_vel(struct as504x_s *as504x);
 // Shared Variable(s):
 //****************************************************************************
 
-extern struct as504x_s as5047, as5048b;
+extern volatile struct as504x_s as5047, as5048b;
 extern volatile uint8_t spi_isr_state;
-extern uint16 spidata_miso[];
+extern volatile uint16 spidata_miso[];
 extern uint16 spidata_mosi2[];
 extern uint16 as5047_angle;
-extern int32_t spi_read_flag;
+extern volatile int32_t spi_read_flag;
 extern volatile uint16 as5047_empty_read;
 
 //****************************************************************************

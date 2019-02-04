@@ -76,7 +76,7 @@ void in_control_get_pwm_dir(void);
 #define CURRENT_SPAN			((int32)1850)		//Variation from zero (technically, that's SPAN/2)
 #define CURRENT_POS_LIMIT		CURRENT_SPAN
 #define CURRENT_NEG_LIMIT		(-CURRENT_SPAN)
-#define MAX_CUM_CURRENT_ERROR	14000000
+#define MAX_CUM_CURRENT_ERROR	100000
 
 //Nickname for the controller gains:
 #define I_KP					g0
@@ -95,7 +95,7 @@ void in_control_get_pwm_dir(void);
 #define STEP					(PI/STEPS)
 #define DELAY					100
 
-#define MAX_ERR_SUM				400000
+#define MAX_ERR_SUM				10000000
 #define PWM_SAT					30000	
 
 //ToDo: do we need MAX_CUMULATIVE_ERROR and MAX_ERR_SUM or can they be the same? 
@@ -105,6 +105,4 @@ void in_control_get_pwm_dir(void);
 // Structure(s)
 //****************************************************************************	
 
-	
 #endif	//INC_MOTOR_H
-	

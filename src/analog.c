@@ -47,7 +47,7 @@
 volatile uint16 adc1_res[ADC1_CHANNELS][ADC1_BUF_LEN];
 volatile uint16 adc1_dbuf[ADC1_CHANNELS][ADC1_BUF_LEN];
 volatile uint16 adc1_res_filtered[ADC1_CHANNELS];
-uint16 adc_sar1_dma_array[ADC1_BUF_LEN + 1];
+volatile uint16 adc_sar1_dma_array[ADC1_BUF_LEN + 1];
 
 //DMA ADC SAR 1
 uint8_t DMA_5_Chan;

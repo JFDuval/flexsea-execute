@@ -43,6 +43,7 @@
 
 void i2t_sample(int32_t lastCurrentRead);
 int32_t i2t_compute(void);
+uint8_t i2t_get_percentage(void);
 
 //****************************************************************************
 // Shared variable(s)
@@ -54,6 +55,8 @@ extern uint8_t currentLimit;
 // Definition(s):
 //****************************************************************************
 
+//Please note that there is an Octave/Matlab script in /ref/ => i2t-user.h
+//It computes all the constants, and it plots limit vs time.
 #define I2T_SAMPLES				8
 #define I2T_SAMPLES_SHIFT		3
 //The algorithm uses 8bit values: we need to scale down the maximum current
@@ -82,9 +85,6 @@ extern uint8_t currentLimit;
 //time = (Limit * dt) / ( (CURR>>I2C_SCALE_DOWN_SHIFT)^2 - I2T_LEAK )
 //time = (22888 * 0.1) / ( (20000mA>>7)^2 - 1526 ) = 22888 / (24414 - 1526)
 //time = 0.1 s
-
-//Please note that there is an Octave/Matlab script in /ref/. It makes this 
-//calculation faster, and it plots limit vs time.
 
 //Return values:
 #define RET_I2T_NORMAL			0

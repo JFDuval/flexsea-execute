@@ -73,7 +73,7 @@ void double_buffer_adc(void);
 volatile extern uint16 adc1_res[ADC1_CHANNELS][ADC1_BUF_LEN];
 volatile extern uint16 adc1_res_filtered[ADC1_CHANNELS];
 volatile extern uint16 adc1_dbuf[ADC1_CHANNELS][ADC1_BUF_LEN];
-extern uint16 adc_sar1_dma_array[ADC1_BUF_LEN + 1];
+extern volatile uint16 adc_sar1_dma_array[ADC1_BUF_LEN + 1];
 
 //****************************************************************************
 // Structure(s):

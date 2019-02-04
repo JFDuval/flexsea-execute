@@ -59,7 +59,7 @@ uint8_t init_usb(void)
 	uint16 cnt = 0, flag = 0;
 	
 	//Start USBFS Operation with 5V operation
-    USBUART_1_Start(0u, USBUART_1_5V_OPERATION);
+	USBUART_1_Start(0u, USBUART_1_5V_OPERATION);
 	
 	//Wait for Device to enumerate
 	for(cnt = 0; cnt < USB_ENUM_TIMEOUT; cnt++)
@@ -72,15 +72,15 @@ uint8_t init_usb(void)
 		CyDelay(1);
 	}
 
-	if(flag)	
+	if(flag)
 	{
-	    //Enumeration is done, enable OUT endpoint for receive data from Host
-	    USBUART_1_CDC_Init();
+		//Enumeration is done, enable OUT endpoint for receive data from Host
+		USBUART_1_CDC_Init();
 		usbConnected = 1;
 		return 1;		//Success
 	}
 	
-	return 0;	//Timeout	
+	return 0;	//Timeout
 }
 
 //Call this function periodically to see if USB is ready to be connected.
@@ -92,7 +92,7 @@ void usbRuntimeConnect(void)
 	if(USBUART_1_GetConfiguration())
 	{
 		//Enumeration is done, enable OUT endpoint for receive data from Host
-	    USBUART_1_CDC_Init();
+		USBUART_1_CDC_Init();
 		usbConnected = 1;
 	}
 }
@@ -102,16 +102,16 @@ void get_usb_data(void)
 	static 	int16 count = 0;
 	
 	//USB Data
-	if(USBUART_1_DataIsReady() != 0u)               	//Check for input data from PC
-	{   
-		count = USBUART_1_GetAll(buffer);           	//Read received data and re-enable OUT endpoint
+	if(USBUART_1_DataIsReady() != 0u)			   	//Check for input data from PC
+	{
+		count = USBUART_1_GetAll(buffer);		   	//Read received data and re-enable OUT endpoint
 		if(count != 0u)
 		{
-			//Store all bytes in rx buf:			
+			//Store all bytes in rx buf:
 			update_rx_buf_array_usb(buffer, count+1);
 			commPeriph[PORT_USB].rx.bytesReadyFlag = 1;
 		}
-    } 	
+	}
 }
 
 //Sends a fixed length packet over USB. Discarded if USB isn't ready.

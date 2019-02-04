@@ -45,6 +45,7 @@
 #include "cyapicallbacks.h"
 #include "flexsea_system.h"
 #include "misc.h"
+#include "flexsea_user_structs.h"
 
 //****************************************************************************
 // Variable(s)
@@ -82,6 +83,7 @@ int main(void)
 	init_peripherals();
 	
 	initializeGlobalStructs();
+	initializeUserStructs();
 
 	#ifdef FINDPOLES
 		calibrationFlags |= CALIBRATION_FIND_POLES;

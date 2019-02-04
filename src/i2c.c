@@ -50,7 +50,7 @@ volatile uint8_t i2c_0_r_buf[24];
 
 //****************************************************************************
 // Private Function Prototype(s):
-//****************************************************************************	
+//****************************************************************************
 
 
 //****************************************************************************
@@ -95,7 +95,7 @@ void i2c_0_fsm(void)
 			#ifdef USE_AS5048B
 			get_as5048b_position();
 			i2c_last_request = I2C_RQ_AS5048B;
-            
+			
 			#endif //USE_AS5048B
 			break;
 		
@@ -187,62 +187,62 @@ int i2c0_read(uint8_t slave_addr, uint8_t reg_addr, uint8_t *pdata, uint16 lengt
 //timeout is in us
 uint8_t I2C_0_MasterWriteByteTimeOut(uint8_t theByte, uint32 timeout)
 {
-    uint8_t errStatus;
+	uint8_t errStatus;
 	uint32_t t = 0;	//For the timeout
 
-    errStatus = I2C_0_MSTR_NOT_READY;
+	errStatus = I2C_0_MSTR_NOT_READY;
 
-    /* Check if START condition was generated */
-    if(I2C_0_CHECK_MASTER_MODE(I2C_0_MCSR_REG))
-    {
-        I2C_0_DATA_REG = theByte;                        /* Write DATA register */
+	/* Check if START condition was generated */
+	if(I2C_0_CHECK_MASTER_MODE(I2C_0_MCSR_REG))
+	{
+		I2C_0_DATA_REG = theByte;						/* Write DATA register */
 		t = 0;
 		
 		
-        //I2C_0_TRANSMIT_DATA_MANUAL_TIMEOUT;                      /* Set transmit mode */
+		//I2C_0_TRANSMIT_DATA_MANUAL_TIMEOUT;					  /* Set transmit mode */
 		
-        I2C_0_TRANSMIT_DATA;								
-        while(I2C_0_CHECK_BYTE_COMPLETE(I2C_0_CSR_REG))		
-        {													
-            /* Wait when byte complete is cleared */		
+		I2C_0_TRANSMIT_DATA;								
+		while(I2C_0_CHECK_BYTE_COMPLETE(I2C_0_CSR_REG))		
+		{													
+			/* Wait when byte complete is cleared */		
 			t++;											
 			if(t > timeout)									
 				break;										
 			else											
 				CyDelayUs(1);								
-        }	
+		}	
 		
 		
-        I2C_0_state = I2C_0_SM_MSTR_WR_DATA;  /* Set state WR_DATA */
+		I2C_0_state = I2C_0_SM_MSTR_WR_DATA;  /* Set state WR_DATA */
 
-        /* Make sure the last byte has been transfered first */
+		/* Make sure the last byte has been transfered first */
 		t = 0;
-        while(I2C_0_WAIT_BYTE_COMPLETE(I2C_0_CSR_REG))
-        {
+		while(I2C_0_WAIT_BYTE_COMPLETE(I2C_0_CSR_REG))
+		{
 			/*
-           //Wait for byte to be written
+		   //Wait for byte to be written
 			t++;
 			if(t > timeout)	
 				break;
 			else
 				CyDelayUs(1);
 			*/
-        }
+		}
 
 
-        if(I2C_0_CHECK_DATA_ACK(I2C_0_CSR_REG))
-        {
-            I2C_0_state = I2C_0_SM_MSTR_HALT;     /* Set state to HALT */
-            errStatus = I2C_0_MSTR_NO_ERROR;                 /* The LRB was ACKed */
-        }
-        else
-        {
-            I2C_0_state = I2C_0_SM_MSTR_HALT;     /* Set state to HALT */
-            errStatus = I2C_0_MSTR_ERR_LB_NAK;               /* The LRB was NACKed */
-        }
-    }
+		if(I2C_0_CHECK_DATA_ACK(I2C_0_CSR_REG))
+		{
+			I2C_0_state = I2C_0_SM_MSTR_HALT;	 /* Set state to HALT */
+			errStatus = I2C_0_MSTR_NO_ERROR;				 /* The LRB was ACKed */
+		}
+		else
+		{
+			I2C_0_state = I2C_0_SM_MSTR_HALT;	 /* Set state to HALT */
+			errStatus = I2C_0_MSTR_ERR_LB_NAK;			   /* The LRB was NACKed */
+		}
+	}
 
-    return(errStatus);
+	return(errStatus);
 }
 
 //Associate data with the right structure. We need that because of the way the ISR-based
@@ -281,9 +281,9 @@ void assign_i2c_data(uint8_t *newdata)
 	}
 	else if(i2c_last_request == I2C_RQ_AS5048B)
 	{
-        reset_ang_counter(&as5048b);
-        tmp = (newdata[0]<<6) + (newdata[1]&0x3F);
-		update_as504x(tmp, &as5048b);     
+		reset_ang_counter(&as5048b);
+		tmp = (newdata[0]<<6) + (newdata[1]&0x3F);
+		update_as504x(tmp, &as5048b);	 
 	}
 	else if(i2c_last_request == I2C_RQ_EXT_STRAIN)
 	{
