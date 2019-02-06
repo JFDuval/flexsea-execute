@@ -10,10 +10,6 @@
 	path = flexsea-shared
 	url = https://github.com/JFDuval/flexsea-shared.git
 	branch = dev
-[submodule "flexsea-user"]
-	path = flexsea-user
-	url = https://github.com/JFDuval/flexsea-user.git
-	branch = dev
 [submodule "flexsea-execute-cop"]
 	path = flexsea-execute-cop
 	url = https://github.com/JFDuval/flexsea-execute-cop.git
