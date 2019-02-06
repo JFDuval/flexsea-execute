@@ -180,7 +180,7 @@ void mainFSM5(void)
 //Case 6: P & Z controllers, 0 PWM
 void mainFSM6(void)
 {
-	//#ifdef USE_TRAPEZ	
+	uint8_t ch = 0;
 	
 	// If we are running a calibration test, all controllers should be disabled anyways.
 	// Also we should be in CTRL_NONE, but that should be handled elsewhere
@@ -189,21 +189,26 @@ void mainFSM6(void)
 		return;
 	}
 	
-	if(ctrl[0].active_ctrl == CTRL_POSITION)
+	if(ctrl[ch].active_ctrl == CTRL_POSITION)
 	{
-		motor_position_pid(ctrl[0].position.setp, ctrl[0].position.pos, 0);
+		motor_position_pid(ctrl[ch].position.setp, ctrl[ch].position.pos, ch);
 	}
-	else if(ctrl[0].active_ctrl == CTRL_IMPEDANCE)
+	else if(ctrl[ch].active_ctrl == CTRL_IMPEDANCE)
 	{
-		impedance_controller(0);
+		impedance_controller(ch);
 	}
-	
-	//#endif	//USE_TRAPEZ
 	
 	//If no controller is used the PWM should be 0:
-	if(ctrl[0].active_ctrl == CTRL_NONE)
+	if(ctrl[ch].active_ctrl == CTRL_NONE)
 	{
-		motor_open_speed_1(0);
+		setMotorVoltage(0, ch);
+	}
+	
+	//If we have a communication problem we kill the motor:
+	if(suppressMotor)
+	{
+		ctrl[ch].active_ctrl = CTRL_NONE;
+		setMotorVoltage(0, ch);
 	}
 }
 
@@ -292,13 +297,14 @@ void mainFSM10kHz(void)
 		
 		//Time to reply - RS-485?
 		sendMasterDelayedResponse();
+		
+		//Monitor comm:
+		//suppressMotor = detectMnCommError(new_cmd_led);
 	
 	#endif	//USE_COMM 
 	
 	#if(((MOTOR_COMMUT == COMMUT_BLOCK) && (CURRENT_SENSING != CS_LEGACY)) || \
 		(MOTOR_COMMUT == COMMUT_SINE))
-		
-		//current_rms_1();	//update the motor current
 		
 		if((calibrationFlags == 0) && ((ctrl[0].active_ctrl == CTRL_CURRENT) || (ctrl[0].active_ctrl == CTRL_IMPEDANCE)))
 		{
@@ -311,7 +317,6 @@ void mainFSM10kHz(void)
 		}
 		
 	#endif
-
 	
 	//RGB LED:
 	rgbLedRefresh();
@@ -347,4 +352,3 @@ uint16_t computeFsmStatus(volatile int8_t *timingError)
 
 	return fsmStatus;
 }
-

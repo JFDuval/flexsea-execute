@@ -8,11 +8,13 @@
 
 #PSoC:
 
+Archive/
 *.cycdx
 *.cyfit
 *.rpt
 *.svd
 *.lst
+ComponentUpdateLog.txt
 
 #Very specific:
 
