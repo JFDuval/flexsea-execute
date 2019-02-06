@@ -124,7 +124,15 @@ void init_motor(void)
 	#endif	//MOTOR_TYPE == MOTOR_BRUSHED	
 }
 
-//TODO: rename to setMotorVoltage, or something like that
+//ToDo: temporary wrapping motor_open_speed_1() into setMotorVoltage for 
+//submodule compatibility
+
+void setMotorVoltage(int32 mV, uint8_t ch)
+{
+	(void)ch;
+	motor_open_speed_1(mV);
+}
+
 // takes as an argument the voltage to set the motor to, in milliVolts
 // applies a PWM to the motor, considering the nonlinear relationship between PWM and motor voltage
 // also accounts for the linear relationship between motor voltage & battery voltage

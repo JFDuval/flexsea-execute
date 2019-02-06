@@ -13,3 +13,6 @@
 [submodule "flexsea-execute-cop"]
 	path = flexsea-execute-cop
 	url = https://github.com/JFDuval/flexsea-execute-cop.git
+[submodule "flexsea-projects"]
+	path = flexsea-projects
+	url = https://github.com/DephyInc/flexsea-projects.git

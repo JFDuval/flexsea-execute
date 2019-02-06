@@ -88,20 +88,23 @@ uint8_t getDeviceType();
 #define comm_str_485_1					comm_str_1
 #define unpack_payload_485				unpack_payload_1
 #define rx_command_485					rx_command_1
-#define update_rx_buf_byte_485			update_rx_buf_byte_1
-#define update_rx_buf_array_485			update_rx_buf_array_1
+//#define update_rx_buf_byte_485			update_rx_buf_byte_1
+//#define update_rx_buf_array_485			update_rx_buf_array_1
+#define update_rx_buf_485(x, y)			circ_buff_write(commPeriph[PORT_RS485_1].rx.circularBuff, (x), (y))
 
 #define comm_str_usb					comm_str_2
 #define unpack_payload_usb				unpack_payload_2
 #define rx_command_usb					rx_command_2
-#define update_rx_buf_byte_usb			update_rx_buf_byte_2
-#define update_rx_buf_array_usb			update_rx_buf_array_2
+//#define update_rx_buf_byte_usb			update_rx_buf_byte_2
+//#define update_rx_buf_array_usb			update_rx_buf_array_2
+#define update_rx_buf_usb(x, y)			circ_buff_write(commPeriph[PORT_USB].rx.circularBuff, (x), (y))
 
 #define comm_str_wireless				comm_str_3
 #define unpack_payload_wireless			unpack_payload_3
 #define rx_command_wireless				rx_command_3
-#define update_rx_buf_byte_wireless		update_rx_buf_byte_3
-#define update_rx_buf_array_wireless	update_rx_buf_array_3
+//#define update_rx_buf_byte_wireless		update_rx_buf_byte_3
+//#define update_rx_buf_array_wireless	update_rx_buf_array_3
+#define update_rx_buf_wireless(x, y)		circ_buff_write(commPeriph[PORT_EXP].rx.circularBuff, (x), (y))
 
 //===============
 //</FlexSEA User>

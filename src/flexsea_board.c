@@ -111,13 +111,15 @@ void flexsea_receive_from_master(void)
 	#ifdef USE_USB			
 
 		get_usb_data();
-		tryUnpacking(&commPeriph[PORT_USB], &packet[PORT_USB][INBOUND]);
+		//tryUnpacking(&commPeriph[PORT_USB], &packet[PORT_USB][INBOUND]);
+		commPeriph[PORT_USB].rx.unpackedPacketsAvailable = tryParseRx(&commPeriph[PORT_USB], &packet[PORT_USB][INBOUND]);
 		
 	#endif
 
 	#ifdef USE_RS485
 		
-		tryUnpacking(&commPeriph[PORT_RS485_1], &packet[PORT_RS485_1][INBOUND]);
+		//tryUnpacking(&commPeriph[PORT_RS485_1], &packet[PORT_RS485_1][INBOUND]);
+		commPeriph[PORT_RS485_1].rx.unpackedPacketsAvailable = tryParseRx(&commPeriph[PORT_RS485_1], &packet[PORT_RS485_1][INBOUND]);
 		
 	#endif
 
@@ -126,6 +128,15 @@ void flexsea_receive_from_master(void)
 		tryUnpacking(&commPeriph[PORT_WIRELESS], &packet[PORT_WIRELESS][INBOUND]);
 		
 	#endif
+}
+
+uint8_t getDeviceId()
+{
+	return 1;
+}
+uint8_t getDeviceType()
+{
+	return FX_EXECUTE;
 }
 
 uint8_t getBoardID(void)

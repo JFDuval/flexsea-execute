@@ -48,6 +48,7 @@
 void init_motor(void);	
 void motor_open_speed_1(int32 pwm_duty);
 void motor_open_speed_2(int16 pwm_duty, int sign);
+void setMotorVoltage(int32 mV, uint8_t ch);
 
 void motor_fixed_pwm_test_code_blocking(int spd);
 void motor_fixed_pwm_test_code_non_blocking(int spd);

@@ -108,8 +108,8 @@ void get_usb_data(void)
 		if(count != 0u)
 		{
 			//Store all bytes in rx buf:
-			update_rx_buf_array_usb(buffer, count+1);
-			commPeriph[PORT_USB].rx.bytesReadyFlag = 1;
+			update_rx_buf_usb(buffer, count+1);
+			commPeriph[PORT_USB].rx.bytesReadyFlag++;
 		}
 	}
 }
