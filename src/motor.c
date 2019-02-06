@@ -165,7 +165,7 @@ void motor_open_speed_1(int32 voltageToApply)
 		pdc = pdc * PWM_SIGN;
 		
 		//Save value to structure:
-		ctrl.pwm = pdc;
+		ctrl[0].pwm = pdc;
 		
 		//Change direction according to sign
 		if(pdc < 0)
@@ -299,7 +299,7 @@ void motor_fixed_pwm_test_code_blocking(int spd)
 {
 	uint8_t toggle_wdclk = 0;	
 	
-	ctrl.active_ctrl = CTRL_OPEN;	
+	ctrl[0].active_ctrl = CTRL_OPEN;	
 	#if (MOTOR_COMMUT == COMMUT_BLOCK)
 	Coast_Brake_Write(1);	//Brake
 	#endif
@@ -315,14 +315,14 @@ void motor_fixed_pwm_test_code_blocking(int spd)
 		toggle_wdclk ^= 1;
 		WDCLK_Write(toggle_wdclk);
 		
-		refresh_enc_control();
+		refresh_enc_control(0);
 	}
 }
 
 //Sends a constant PWM. Non-Blocking.
 void motor_fixed_pwm_test_code_non_blocking(int spd)
 {
-	ctrl.active_ctrl = CTRL_OPEN;	
+	ctrl[0].active_ctrl = CTRL_OPEN;	
 	#if (MOTOR_COMMUT == COMMUT_BLOCK)
 	Coast_Brake_Write(1);	//Brake
 	#endif

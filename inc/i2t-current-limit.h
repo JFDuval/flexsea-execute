@@ -62,7 +62,7 @@ extern uint8_t currentLimit;
 //The algorithm uses 8bit values: we need to scale down the maximum current
 //accordingly.
 //Ex.: if you read ±11bits (±2048), 2048/256 = 8, so shift 3
-//In this project, we use ctrl.current.actual_val, an int32 value. 
+//In this project, we use ctrl[0].current.actual_val, an int32 value. 
 //It is limited to ±30000mA (max that our sensor can read)
 //30000/256 = 117 => shift 7 (div by 128). 30A will give us 234
 #define I2C_SCALE_DOWN_SHIFT	7

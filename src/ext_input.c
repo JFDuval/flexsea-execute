@@ -62,7 +62,7 @@ void init_qei(void)
 
 //Updates the structure with the latest encoder value
 //Only deals with the Controller encoder (no commutation)
-int32 refresh_enc_control(void)
+int32 refresh_enc_control(uint8_t ch)
 {
     //Count: actual, last, difference
 	encoder.count_last = encoder.count;
@@ -72,14 +72,14 @@ int32 refresh_enc_control(void)
 	#elif(ENC_CONTROL == ENC_ANALOG)
 		encoder.count = get_analog_pos();	
 	#elif(ENC_CONTROL == ENC_AS5047)
-		ctrl.impedance.actual_val = *exec1.enc_ang;
-		ctrl.impedance.actual_vel = *exec1.enc_ang_vel;
-		ctrl.position.pos = *exec1.enc_ang;
+		ctrl[ch].impedance.actual_val = *exec1.enc_ang;
+		ctrl[ch].impedance.actual_vel = *exec1.enc_ang_vel;
+		ctrl[ch].position.pos = *exec1.enc_ang;
 		return *(exec1.enc_ang);
 	#elif(ENC_CONTROL == ENC_AS5048B)
-		ctrl.impedance.actual_val = *(exec1.enc_ang);
-		ctrl.impedance.actual_vel = *(exec1.enc_ang_vel);
-		ctrl.position.pos = *(exec1.enc_ang);
+		ctrl[ch].impedance.actual_val = *(exec1.enc_ang);
+		ctrl[ch].impedance.actual_vel = *(exec1.enc_ang_vel);
+		ctrl[ch].position.pos = *(exec1.enc_ang);
 		return *(exec1.enc_ang);
     #elif(ENC_CONTROL == ENC_CUSTOM)
 		encoder.count = CTRL_ENC_FCT(get_enc_custom());
@@ -89,8 +89,8 @@ int32 refresh_enc_control(void)
 	encoder.count_dif = encoder.count - encoder.count_last;
 	
 	//For the position & impedance controllers we use the last count
-	ctrl.position.pos = encoder.count;
-	ctrl.impedance.actual_val = encoder.count;
+	ctrl[ch].position.pos = encoder.count;
+	ctrl[ch].impedance.actual_val = encoder.count;
 	*/
 	
 	return encoder.count;

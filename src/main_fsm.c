@@ -104,7 +104,7 @@ void mainFSM2(void)
 {
 	#ifdef USE_I2T_LIMIT
 	//Sample current (I2t limit):
-	i2t_sample(ctrl.current.actual_vals.avg);
+	i2t_sample(ctrl[0].current.actual_vals.avg);
 	#endif	//USE_I2T_LIMIT
 			
 	//100ms timebase:
@@ -161,17 +161,17 @@ void mainFSM4(void)
 void mainFSM5(void)
 {
 	//Refresh encoder readings (ENC_CONTROL only)
-	refresh_enc_control();
+	refresh_enc_control(0);
 	
 	#ifdef USE_TRAPEZ	
 
 	//Trapezoidal trajectories (can be used for both Position & Impedance)	
-	if((ctrl.active_ctrl == CTRL_POSITION) || (ctrl.active_ctrl == CTRL_IMPEDANCE))
+	if((ctrl[0].active_ctrl == CTRL_POSITION) || (ctrl[0].active_ctrl == CTRL_IMPEDANCE))
 	{
-		ctrl.position.trap_t++;
-		ctrl.impedance.trap_t++;
-		ctrl.position.setp = trapez_get_pos(steps);	//New setpoint
-		ctrl.impedance.setpoint_val = trapez_get_pos(steps);	//New setpoint
+		ctrl[0].position.trap_t++;
+		ctrl[0].impedance.trap_t++;
+		ctrl[0].position.setp = trapez_get_pos(steps);	//New setpoint
+		ctrl[0].impedance.setpoint_val = trapez_get_pos(steps);	//New setpoint
 	}
 	
 	#endif	//USE_TRAPEZ
@@ -189,19 +189,19 @@ void mainFSM6(void)
 		return;
 	}
 	
-	if(ctrl.active_ctrl == CTRL_POSITION)
+	if(ctrl[0].active_ctrl == CTRL_POSITION)
 	{
-		motor_position_pid(ctrl.position.setp, ctrl.position.pos);
+		motor_position_pid(ctrl[0].position.setp, ctrl[0].position.pos, 0);
 	}
-	else if(ctrl.active_ctrl == CTRL_IMPEDANCE)
+	else if(ctrl[0].active_ctrl == CTRL_IMPEDANCE)
 	{
-		impedance_controller();
+		impedance_controller(0);
 	}
 	
 	//#endif	//USE_TRAPEZ
 	
 	//If no controller is used the PWM should be 0:
-	if(ctrl.active_ctrl == CTRL_NONE)
+	if(ctrl[0].active_ctrl == CTRL_NONE)
 	{
 		motor_open_speed_1(0);
 	}
@@ -239,7 +239,7 @@ void mainFSM7(void)
 //Case 8: SAR ADC filtering
 void mainFSM8(void)
 {
-	update_diffarr_avg(&ctrl.current.actual_vals,50);
+	update_diffarr_avg(&ctrl[0].current.actual_vals,50);
 	calc_motor_L();
 	if(adc_sar1_flag)
 	{
@@ -300,14 +300,14 @@ void mainFSM10kHz(void)
 		
 		//current_rms_1();	//update the motor current
 		
-		if((calibrationFlags == 0) && ((ctrl.active_ctrl == CTRL_CURRENT) || (ctrl.active_ctrl == CTRL_IMPEDANCE)))
+		if((calibrationFlags == 0) && ((ctrl[0].active_ctrl == CTRL_CURRENT) || (ctrl[0].active_ctrl == CTRL_IMPEDANCE)))
 		{
 			//Current controller
-			motor_current_pid_3(ctrl.current.setpoint_val, ctrl.current.actual_vals.avg);
+			motor_current_pid_3(ctrl[0].current.setpoint_val, ctrl[0].current.actual_vals.avg, 0);
 		}
 		else
 		{
-			ctrl.current.error_sum = 0;
+			ctrl[0].current.error_sum = 0;
 		}
 		
 	#endif

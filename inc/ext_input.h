@@ -51,7 +51,7 @@ extern struct enc_s encoder;
 void init_qei(void);
 void qei_write(int32 enc);
 int32 qei_read(void);
-int32 refresh_enc_control(void);
+int32 refresh_enc_control(uint8_t ch);
 int32 refresh_enc_display(void);
 int16 get_analog_pos(void);
 

@@ -419,9 +419,9 @@ void calc_motor_L(void)
 	static struct diffarr_s currs;
 	static int32_t mot_induc;
 	
-	update_diffarr(&currs,ctrl.current.actual_vals.avg,20);
+	update_diffarr(&currs,ctrl[0].current.actual_vals.avg,20);
 	update_diffarr_avg(&currs,10);
-	if (ctrl.active_ctrl == CTRL_NONE)
+	if (ctrl[0].active_ctrl == CTRL_NONE)
 	{
 		mot_induc = 0;
 	}

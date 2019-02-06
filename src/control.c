@@ -52,7 +52,7 @@
 //****************************************************************************
 
 //Main data structure for all the controllers:
-struct ctrl_s ctrl;
+struct ctrl_s ctrl[2];
 
 //In Control tool:
 struct in_control_s in_control;
@@ -62,11 +62,11 @@ struct in_control_s in_control;
 //****************************************************************************
 
 //Use this function to change the control strategy
-void control_strategy(uint8_t strat)
+void control_strategy(uint8_t strat, uint8_t ch)
 {
 	//Are we already using this controller?
 	//Are we currently running a calibration routine?
-	if(calibrationFlags || ctrl.active_ctrl == strat)
+	if(calibrationFlags || ctrl[ch].active_ctrl == strat)
 	{
 		//Yes. Nothing to do, exit.
 		return;
@@ -78,32 +78,32 @@ void control_strategy(uint8_t strat)
 		//By default we place the gains to 0 before we change the strategy:
 						
 		//Position controller
-		ctrl.position.gain.P_KP = 0;
-		ctrl.position.gain.P_KI = 0;
-		ctrl.position.gain.P_KD = 0;
+		ctrl[ch].position.gain.P_KP = 0;
+		ctrl[ch].position.gain.P_KI = 0;
+		ctrl[ch].position.gain.P_KD = 0;
 		
 		//Impedance controller
-		ctrl.impedance.gain.Z_K = 0;
-		ctrl.impedance.gain.Z_B = 0;
-		ctrl.impedance.gain.Z_I = 0;
+		ctrl[ch].impedance.gain.Z_K = 0;
+		ctrl[ch].impedance.gain.Z_B = 0;
+		ctrl[ch].impedance.gain.Z_I = 0;
 		
 		//Current controller
-		ctrl.current.gain.I_KP = 0;
-		ctrl.current.gain.I_KI = 0;
-		ctrl.current.gain.I_KD = 0;
-		ctrl.current.setpoint_val = 0;
-        ctrl.current.error_sum = 0;
+		ctrl[ch].current.gain.I_KP = 0;
+		ctrl[ch].current.gain.I_KI = 0;
+		ctrl[ch].current.gain.I_KD = 0;
+		ctrl[ch].current.setpoint_val = 0;
+        ctrl[ch].current.error_sum = 0;
 		
 		//To avoid a huge startup error on the Position-based controllers:
 		if(strat == CTRL_POSITION)
 		{
-			ctrl.position.setp = refresh_enc_control();
-			steps = trapez_gen_motion_1(ctrl.position.setp, ctrl.position.setp, 1, 1);
+			ctrl[ch].position.setp = refresh_enc_control(ch);
+			steps = trapez_gen_motion_1(ctrl[ch].position.setp, ctrl[ch].position.setp, 1, 1);
 		}
 		else if(strat == CTRL_IMPEDANCE)
 		{
-			ctrl.impedance.setpoint_val = refresh_enc_control();
-			steps = trapez_gen_motion_1(ctrl.impedance.setpoint_val, ctrl.impedance.setpoint_val, 1, 1);
+			ctrl[ch].impedance.setpoint_val = refresh_enc_control(ch);
+			steps = trapez_gen_motion_1(ctrl[ch].impedance.setpoint_val, ctrl[ch].impedance.setpoint_val, 1, 1);
 		}
         
         if (strat != CTRL_MEASRES)
@@ -115,8 +115,8 @@ void control_strategy(uint8_t strat)
             measure_motor_resistance = 1;
         }
 		
-		ctrl.active_ctrl = strat;
-		in_control.controller = ctrl.active_ctrl;
+		ctrl[ch].active_ctrl = strat;
+		in_control.controller = ctrl[ch].active_ctrl;
 		
 		//The user should call a set gain function at this point.
 	}
@@ -125,98 +125,103 @@ void control_strategy(uint8_t strat)
 //Starts all the parameters at 0 or Default values
 void init_ctrl_data_structure(void)
 {
-	//No active controller:
-	ctrl.active_ctrl = CTRL_NONE;
+	uint8_t ch = 0;
 	
-	//Generic controller
-	ctrl.generic.gain.g0 = 0;
-	ctrl.generic.gain.g1 = 0;
-	ctrl.generic.gain.g2 = 0;
-	ctrl.generic.gain.g3 = 0;
-	ctrl.generic.gain.g4 = 0;
-	ctrl.generic.gain.g5 = 0;
-	ctrl.generic.actual_val = 0;
-	ctrl.generic.setpoint_val = 0;
-	ctrl.generic.error = 0;
-	ctrl.generic.error_sum = 0;
-	ctrl.generic.error_dif = 0;
-	
-	//Position controller
-	ctrl.position.gain.g0 = 0;
-	ctrl.position.gain.g1 = 0;
-	ctrl.position.gain.g2 = 0;
-	ctrl.position.gain.g3 = 0;
-	ctrl.position.gain.g4 = 0;
-	ctrl.position.gain.g5 = 0;
-	ctrl.position.pos = 0;
-	ctrl.position.setp = 0;
-	ctrl.position.error = 0;
-	ctrl.position.error_sum = 0;
-	ctrl.position.error_dif = 0;
-	
-	//Impedance controller
-	ctrl.impedance.gain.g0 = 0;
-	ctrl.impedance.gain.g1 = 0;
-	ctrl.impedance.gain.g2 = 0;
-	ctrl.impedance.gain.g3 = 0;
-	ctrl.impedance.gain.g4 = 0;
-	ctrl.impedance.gain.g5 = 0;
-	ctrl.impedance.actual_val = 0;
-    ctrl.impedance.actual_vel = 0;
-	ctrl.impedance.setpoint_val = 0;
-	ctrl.impedance.error = 0;
-	ctrl.impedance.error_sum = 0;
-	ctrl.impedance.error_dif = 0;
-	
-	//Current controller
-	ctrl.current.gain.g0 = 0;
-	ctrl.current.gain.g1 = 0;
-	ctrl.current.gain.g2 = 0;
-	ctrl.current.gain.g3 = 0;
-	ctrl.current.gain.g4 = 0;
-	ctrl.current.gain.g5 = 0;
-	ctrl.current.actual_val = 0;
-	ctrl.current.setpoint_val = 0;
-	ctrl.current.error = 0;
-	ctrl.current.error_sum = 0;
-	ctrl.current.error_dif = 0;
+	for(ch = 0; ch < 2; ch++)
+	{
+		//No active controller:
+		ctrl[ch].active_ctrl = CTRL_NONE;
+		
+		//Generic controller
+		ctrl[ch].generic.gain.g0 = 0;
+		ctrl[ch].generic.gain.g1 = 0;
+		ctrl[ch].generic.gain.g2 = 0;
+		ctrl[ch].generic.gain.g3 = 0;
+		ctrl[ch].generic.gain.g4 = 0;
+		ctrl[ch].generic.gain.g5 = 0;
+		ctrl[ch].generic.actual_val = 0;
+		ctrl[ch].generic.setpoint_val = 0;
+		ctrl[ch].generic.error = 0;
+		ctrl[ch].generic.error_sum = 0;
+		ctrl[ch].generic.error_dif = 0;
+		
+		//Position controller
+		ctrl[ch].position.gain.g0 = 0;
+		ctrl[ch].position.gain.g1 = 0;
+		ctrl[ch].position.gain.g2 = 0;
+		ctrl[ch].position.gain.g3 = 0;
+		ctrl[ch].position.gain.g4 = 0;
+		ctrl[ch].position.gain.g5 = 0;
+		ctrl[ch].position.pos = 0;
+		ctrl[ch].position.setp = 0;
+		ctrl[ch].position.error = 0;
+		ctrl[ch].position.error_sum = 0;
+		ctrl[ch].position.error_dif = 0;
+		
+		//Impedance controller
+		ctrl[ch].impedance.gain.g0 = 0;
+		ctrl[ch].impedance.gain.g1 = 0;
+		ctrl[ch].impedance.gain.g2 = 0;
+		ctrl[ch].impedance.gain.g3 = 0;
+		ctrl[ch].impedance.gain.g4 = 0;
+		ctrl[ch].impedance.gain.g5 = 0;
+		ctrl[ch].impedance.actual_val = 0;
+	    ctrl[ch].impedance.actual_vel = 0;
+		ctrl[ch].impedance.setpoint_val = 0;
+		ctrl[ch].impedance.error = 0;
+		ctrl[ch].impedance.error_sum = 0;
+		ctrl[ch].impedance.error_dif = 0;
+		
+		//Current controller
+		ctrl[ch].current.gain.g0 = 0;
+		ctrl[ch].current.gain.g1 = 0;
+		ctrl[ch].current.gain.g2 = 0;
+		ctrl[ch].current.gain.g3 = 0;
+		ctrl[ch].current.gain.g4 = 0;
+		ctrl[ch].current.gain.g5 = 0;
+		ctrl[ch].current.actual_val = 0;
+		ctrl[ch].current.setpoint_val = 0;
+		ctrl[ch].current.error = 0;
+		ctrl[ch].current.error_sum = 0;
+		ctrl[ch].current.error_dif = 0;
+	}
 }
 
 //Motor position controller - non blocking
-int32 motor_position_pid(int32 wanted_pos, int32 actual_pos)
+int32 motor_position_pid(int32 wanted_pos, int32 actual_pos, uint8_t ch)
 {
 	int32 p = 0, i = 0, d = 0;
 	int32 pwm = 0;
 
 	//Position values:
-	ctrl.position.pos = actual_pos;
-	ctrl.position.setp = wanted_pos;
-	in_control.actual_val = ctrl.position.pos;
-	in_control.setp = ctrl.position.setp;
+	ctrl[ch].position.pos = actual_pos;
+	ctrl[ch].position.setp = wanted_pos;
+	in_control.actual_val = ctrl[ch].position.pos;
+	in_control.setp = ctrl[ch].position.setp;
 	
 	//Errors:
-	ctrl.position.error_prev = ctrl.position.error;
-	ctrl.position.error = ctrl.position.setp - ctrl.position.pos;
-	in_control.error = ctrl.position.error;
-	ctrl.position.error_sum = ctrl.position.error_sum + ctrl.position.error;
-	ctrl.position.error_dif = (ctrl.position.error_dif << 1) + \
-							6*(ctrl.position.error - ctrl.position.error_prev);
-	ctrl.position.error_dif = ctrl.position.error_dif >> 3;	
+	ctrl[ch].position.error_prev = ctrl[ch].position.error;
+	ctrl[ch].position.error = ctrl[ch].position.setp - ctrl[ch].position.pos;
+	in_control.error = ctrl[ch].position.error;
+	ctrl[ch].position.error_sum = ctrl[ch].position.error_sum + ctrl[ch].position.error;
+	ctrl[ch].position.error_dif = (ctrl[ch].position.error_dif << 1) + \
+							6*(ctrl[ch].position.error - ctrl[ch].position.error_prev);
+	ctrl[ch].position.error_dif = ctrl[ch].position.error_dif >> 3;	
 	
 	//Saturate cumulative error
-	if(ctrl.position.error_sum >= MAX_ERR_SUM)
-		ctrl.position.error_sum = MAX_ERR_SUM;
-	if(ctrl.position.error_sum <= -MAX_ERR_SUM)
-		ctrl.position.error_sum = -MAX_ERR_SUM;
+	if(ctrl[ch].position.error_sum >= MAX_ERR_SUM)
+		ctrl[ch].position.error_sum = MAX_ERR_SUM;
+	if(ctrl[ch].position.error_sum <= -MAX_ERR_SUM)
+		ctrl[ch].position.error_sum = -MAX_ERR_SUM;
 	
 	//Proportional term
-	p = (ctrl.position.gain.P_KP * ctrl.position.error) / 100;
+	p = (ctrl[ch].position.gain.P_KP * ctrl[ch].position.error) / 100;
 	in_control.r[0] = p;
 	//Integral term
-	i = (ctrl.position.gain.P_KI * ctrl.position.error_sum) / 5000;
+	i = (ctrl[ch].position.gain.P_KI * ctrl[ch].position.error_sum) / 5000;
 	in_control.r[1] = i;
 	//Differential term:
-	d = (ctrl.position.gain.P_KD * ctrl.position.error_dif) / 100;
+	d = (ctrl[ch].position.gain.P_KD * ctrl[ch].position.error_dif) / 100;
 	in_control.r[2] = d;
 	
 	//Output
@@ -231,35 +236,35 @@ int32 motor_position_pid(int32 wanted_pos, int32 actual_pos)
 	motor_open_speed_1(pwm);
 	in_control.output = pwm;
 	
-	return ctrl.position.error;
+	return ctrl[ch].position.error;
 }
 
 //Motor position controller - non blocking. PID + Feed Forward (FF)
 //The FF term comes from the calling function, it's added to the output.
-int32 motor_position_pid_ff_1(int32 wanted_pos, int32 actual_pos, int32 ff)
+int32 motor_position_pid_ff_1(int32 wanted_pos, int32 actual_pos, int32 ff, uint8_t ch)
 {
 	int32 p = 0, i = 0, d = 0;
 	int32 pwm = 0;
 
 	//Position values:
-	ctrl.position.pos = actual_pos;
-	ctrl.position.setp = wanted_pos;
+	ctrl[ch].position.pos = actual_pos;
+	ctrl[ch].position.setp = wanted_pos;
 	
 	//Errors:
-	ctrl.position.error = ctrl.position.pos - ctrl.position.setp;
-	ctrl.position.error_sum = ctrl.position.error_sum + ctrl.position.error;
-	//ctrl.position.error_dif ToDo
+	ctrl[ch].position.error = ctrl[ch].position.pos - ctrl[ch].position.setp;
+	ctrl[ch].position.error_sum = ctrl[ch].position.error_sum + ctrl[ch].position.error;
+	//ctrl[ch].position.error_dif ToDo
 	
 	//Saturate cumulative error
-	if(ctrl.position.error_sum >= MAX_CUMULATIVE_ERROR)
-		ctrl.position.error_sum = MAX_CUMULATIVE_ERROR;
-	if(ctrl.position.error_sum <= -MAX_CUMULATIVE_ERROR)
-		ctrl.position.error_sum = -MAX_CUMULATIVE_ERROR;
+	if(ctrl[ch].position.error_sum >= MAX_CUMULATIVE_ERROR)
+		ctrl[ch].position.error_sum = MAX_CUMULATIVE_ERROR;
+	if(ctrl[ch].position.error_sum <= -MAX_CUMULATIVE_ERROR)
+		ctrl[ch].position.error_sum = -MAX_CUMULATIVE_ERROR;
 	
 	//Proportional term
-	p = (ctrl.position.gain.P_KP * ctrl.position.error) / 100;
+	p = (ctrl[ch].position.gain.P_KP * ctrl[ch].position.error) / 100;
 	//Integral term
-	i = (ctrl.position.gain.P_KI * ctrl.position.error_sum) / 100;
+	i = (ctrl[ch].position.gain.P_KI * ctrl[ch].position.error_sum) / 100;
 	//Derivative term
 	d = 0;	//ToDo
 	
@@ -274,13 +279,13 @@ int32 motor_position_pid_ff_1(int32 wanted_pos, int32 actual_pos, int32 ff)
 	
 	motor_open_speed_1(pwm);
 	
-	return ctrl.position.error;
+	return ctrl[ch].position.error;
 }
 
 //PI Current controller #3: for sinusoidal commutation
 //'wanted_curr' & 'measured_curr' are centered at zero and are in the ±CURRENT_SPAN range
 //The sign of 'wanted_curr' will change the rotation direction, not the polarity of the current (I have no control on this)
-inline int32 motor_current_pid_3(int32 wanted_curr, int32 measured_curr)
+inline int32 motor_current_pid_3(int32 wanted_curr, int32 measured_curr, uint8_t ch)
 {
 	int32_t sign = 0;
     //Clip out of range values
@@ -288,19 +293,19 @@ inline int32 motor_current_pid_3(int32 wanted_curr, int32 measured_curr)
 	//	wanted_curr = CURRENT_POS_LIMIT;	
 	
 	//Error and integral of errors:
-	ctrl.current.error = (wanted_curr - measured_curr);					//Actual error
-	ctrl.current.error_sum += ctrl.current.error;	//Cumulative error
+	ctrl[ch].current.error = (wanted_curr - measured_curr);					//Actual error
+	ctrl[ch].current.error_sum += ctrl[ch].current.error;	//Cumulative error
 	
 	//Saturate cumulative error
-	if(ctrl.current.error_sum >= MAX_CUM_CURRENT_ERROR)
-		ctrl.current.error_sum = MAX_CUM_CURRENT_ERROR;
-	if(ctrl.current.error_sum <= -MAX_CUM_CURRENT_ERROR)
-		ctrl.current.error_sum = -MAX_CUM_CURRENT_ERROR;	
+	if(ctrl[ch].current.error_sum >= MAX_CUM_CURRENT_ERROR)
+		ctrl[ch].current.error_sum = MAX_CUM_CURRENT_ERROR;
+	if(ctrl[ch].current.error_sum <= -MAX_CUM_CURRENT_ERROR)
+		ctrl[ch].current.error_sum = -MAX_CUM_CURRENT_ERROR;	
 
 	//Proportional term
-	volatile int32 curr_p = (int) ((ctrl.current.gain.I_KP * ctrl.current.error)>>8);
+	volatile int32 curr_p = (int) ((ctrl[ch].current.gain.I_KP * ctrl[ch].current.error)>>8);
 	//Integral term
-	volatile int32 curr_i = (int)((ctrl.current.error_sum)>>13);
+	volatile int32 curr_i = (int)((ctrl[ch].current.error_sum)>>13);
 	//Add differential term here if needed
 	//In both cases we divide to get a finer gain adjustement w/ integer values.
 
@@ -343,19 +348,19 @@ inline int32 motor_current_pid_3(int32 wanted_curr, int32 measured_curr)
 		//Compare 2 can't be 0 or the ADC won't trigger => that's why I'm adding 1
 	#endif
         
-	return ctrl.current.error;    
+	return ctrl[ch].current.error;    
 }
 
 //Impedance controller
-void impedance_controller(void)
+void impedance_controller(uint8_t ch)
 {
     int32 spring_torq; 
     int32 damping_torq;
 
-    spring_torq = ((ctrl.impedance.setpoint_val-ctrl.impedance.actual_val)*ctrl.impedance.gain.g0)>>4;
-    damping_torq = (-1*(ctrl.impedance.actual_vel)*ctrl.impedance.gain.g1);
+    spring_torq = ((ctrl[ch].impedance.setpoint_val-ctrl[ch].impedance.actual_val)*ctrl[ch].impedance.gain.g0)>>4;
+    damping_torq = (-1*(ctrl[ch].impedance.actual_vel)*ctrl[ch].impedance.gain.g1);
     
-    ctrl.current.setpoint_val = (spring_torq+damping_torq);
+    ctrl[ch].current.setpoint_val = (spring_torq+damping_torq);
 }
 
 //in_control.combined = [CTRL2:0][MOT_DIR][PWM]

@@ -222,9 +222,9 @@ void update_current_arrays(void)
 	
 	//calculate the new filtered current
 	//the filter outputs raw values x 1024 in order to maintain precision
-	//ctrl.current.actual_val = MOTOR_ORIENTATION*filt_array_10khz(motor_currents,motor_currents_filt,40,raw_current); // mAmps where I * the line-to-line motor constant = torque 
-	ctrl.current.actual_val = MOTOR_ORIENTATION*raw_current; // mAmps where I * the line-to-line motor constant = torque 
-	update_diffarr(&ctrl.current.actual_vals,ctrl.current.actual_val,50);
+	//ctrl[0].current.actual_val = MOTOR_ORIENTATION*filt_array_10khz(motor_currents,motor_currents_filt,40,raw_current); // mAmps where I * the line-to-line motor constant = torque 
+	ctrl[0].current.actual_val = MOTOR_ORIENTATION*raw_current; // mAmps where I * the line-to-line motor constant = torque 
+	update_diffarr(&ctrl[0].current.actual_vals,ctrl[0].current.actual_val,50);
 }
 
 void set_current_zero()

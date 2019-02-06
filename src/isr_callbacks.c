@@ -129,13 +129,13 @@ void isr_sar2_dma_Interrupt_InterruptCallback()
 					adc_dma_array[3] + adc_dma_array[4]);
 		adc_avg = (adc_sum / 5);
 		
-		ctrl.current.actual_val = (int32)(adc_avg - CURRENT_ZERO);	
+		ctrl[0].current.actual_val = (int32)(adc_avg - CURRENT_ZERO);	
 		//Used by the current controller, 0 centered.
 			
-		if((ctrl.active_ctrl == CTRL_CURRENT) || (ctrl.active_ctrl == CTRL_IMPEDANCE))
+		if((ctrl[0].active_ctrl == CTRL_CURRENT) || (ctrl[0].active_ctrl == CTRL_IMPEDANCE))
 		{
 			//Current controller
-			motor_current_pid_2(ctrl.current.setpoint_val, ctrl.current.actual_val);
+			motor_current_pid_2(ctrl[0].current.setpoint_val, ctrl[0].current.actual_val);
 		}
 	
 	#else		

@@ -42,21 +42,21 @@
 // Shared variable(s)
 //****************************************************************************
 
-extern struct ctrl_s ctrl;
+extern struct ctrl_s ctrl[2];
 extern struct in_control_s in_control;
 	
 //****************************************************************************
 // Prototype(s):
 //****************************************************************************	
 
-void control_strategy(uint8_t strat);
+void control_strategy(uint8_t strat, uint8_t ch);
 void init_ctrl_data_structure(void);
-int32 motor_position_pid(int32 wanted_pos, int32 actual_pos);
-int32 motor_position_pid_ff_1(int32 wanted_pos, int32 actual_pos, int32 ff);
-int32 motor_current_pid(int32 wanted_curr, int32 measured_curr);
-int32 motor_current_pid_3(int32 wanted_curr, int32 measured_curr);
+int32 motor_position_pid(int32 wanted_pos, int32 actual_pos, uint8_t ch);
+int32 motor_position_pid_ff_1(int32 wanted_pos, int32 actual_pos, int32 ff, uint8_t ch);
+int32 motor_current_pid(int32 wanted_curr, int32 measured_curr, uint8_t ch);
+int32 motor_current_pid_3(int32 wanted_curr, int32 measured_curr, uint8_t ch);
 extern inline int32 motor_current_pid_2(int32 wanted_curr, int32 measured_curr);
-void impedance_controller();
+void impedance_controller(uint8_t ch);
 void in_control_combine(void);
 void in_control_get_pwm_dir(void);
 
