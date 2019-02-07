@@ -239,6 +239,9 @@ void mainFSM7(void)
 			}
 		}
 	}
+	
+	//Timestamp needed by GUI:
+	rigid1.ctrl.timestamp++;
 }
 
 //Case 8: SAR ADC filtering

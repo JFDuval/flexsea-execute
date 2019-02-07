@@ -40,6 +40,7 @@
 #include "usb.h"
 #include "flexsea_board.h"
 #include <flexsea_comm.h>
+#include <flexsea_comm_multi.h>
 
 //****************************************************************************
 // Variable(s)
@@ -108,8 +109,9 @@ void get_usb_data(void)
 		if(count != 0u)
 		{
 			//Store all bytes in rx buf:
-			update_rx_buf_usb(buffer, count+1);
-			commPeriph[PORT_USB].rx.bytesReadyFlag++;
+			//update_rx_buf_usb(buffer, count+1);
+			//commPeriph[PORT_USB].rx.bytesReadyFlag++;
+			copyIntoMultiPacket(comm_multi_periph + PORT_USB, buffer, count+1);
 		}
 	}
 }

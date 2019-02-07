@@ -136,7 +136,8 @@ uint8_t getDeviceId()
 }
 uint8_t getDeviceType()
 {
-	return FX_EXECUTE;
+	//return FX_EXECUTE;
+	return FX_MANAGE;	//ToDo remove, test only
 }
 
 uint8_t getBoardID(void)
