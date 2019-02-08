@@ -47,7 +47,7 @@
 
 uint8_t init_usb(void);
 void get_usb_data(void);
-void usb_puts(uint8_t *buf, uint32 len);
+uint8_t usb_puts(uint8_t *buf, uint32 len);
 void usbRuntimeConnect(void);
 
 //****************************************************************************

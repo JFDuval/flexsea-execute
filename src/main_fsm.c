@@ -46,6 +46,7 @@
 #include "safety.h"
 #include "ext_input.h"
 #include "flexsea_global_structs.h"
+#include "flexsea_interface.h"
 #include "calibration_tools.h"
 #include "flexsea_cmd_stream.h"
 #include "flexsea.h"
@@ -57,6 +58,7 @@
 #include "mag_encoders.h"
 #include "user-ex.h"
 #include <flexsea_board.h>
+#include "flexsea_comm_multi.h"
 
 //****************************************************************************
 // Variable(s)
@@ -74,6 +76,7 @@ volatile uint8_t suppressMotor = 0;
 //****************************************************************************
 
 uint16_t computeFsmStatus(volatile int8_t *timingError);
+void transmitMultiFrame();
 
 //****************************************************************************
 // Public Function(s)
@@ -129,7 +132,8 @@ void mainFSM3(void)
 	#endif
 }
 
-//Case 4: User Interface
+//Case 4: User Interface & Communication
+static uint8_t autoParsed;
 void mainFSM4(void)
 {
 	//Alive LED
@@ -155,9 +159,22 @@ void mainFSM4(void)
 	{
 		new_cmd_led = 0;
 	}
+	
+	//Communication:
+	autoParsed = 0;
+	if(receiveFxPacketByPeriph(comm_multi_periph + PORT_USB) && comm_multi_periph[PORT_USB].out.unpackedIdx > 0)
+	{
+		autoParsed++;
+	}
+	
+	//LED turns green when commands are received
+	if(autoParsed)
+	{
+		new_cmd_led = 1;
+	}
 }
 
-//Case 5: Position sensors & Position setpoint
+//Case 5: Position sensors & Position setpoint, and Comm
 void mainFSM5(void)
 {
 	//Refresh encoder readings (ENC_CONTROL only)
@@ -175,6 +192,12 @@ void mainFSM5(void)
 	}
 	
 	#endif	//USE_TRAPEZ
+	
+	//Communication:
+	if(!autoParsed)
+	{
+		autoStream();
+	}
 }
 
 //Case 6: P & Z controllers, 0 PWM
@@ -210,11 +233,23 @@ void mainFSM6(void)
 		ctrl[ch].active_ctrl = CTRL_NONE;
 		setMotorVoltage(0, ch);
 	}
+	
+	//Comm:
+	int i;
+	for(i = 0; i < NUMBER_OF_PORTS; ++i)
+	{
+		if(comm_multi_periph[i].out.unpackedIdx)
+		{
+			packMultiPacket(&(comm_multi_periph[i].out));
+			comm_multi_periph[i].out.unpackedIdx = 0;
+		}
+	}
 }
 
 //Case 7:
 void mainFSM7(void)
 {
+	/*
 	static int sinceLastStreamSend[MAX_STREAMS] = {0};
 	if(isStreaming)
 	{
@@ -239,6 +274,7 @@ void mainFSM7(void)
 			}
 		}
 	}
+	*/
 	
 	//Timestamp needed by GUI:
 	rigid1.ctrl.timestamp++;
@@ -303,6 +339,14 @@ void mainFSM10kHz(void)
 		
 		//Monitor comm:
 		//suppressMotor = detectMnCommError(new_cmd_led);
+		
+		// Multi Packet stuff
+		static uint8_t flip = 0;
+		flip ^= 1;
+		if(flip)
+		{
+			transmitMultiFrame();
+		}
 	
 	#endif	//USE_COMM 
 	
@@ -354,4 +398,9 @@ uint16_t computeFsmStatus(volatile int8_t *timingError)
 		fsmStatus = (mostOffendingFSM << 4) | (numOffenses & 0x0F);
 
 	return fsmStatus;
+}
+
+void transmitMultiFrame()
+{
+	transmitFxPacket(PORT_USB);
 }

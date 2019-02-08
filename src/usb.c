@@ -117,10 +117,15 @@ void get_usb_data(void)
 }
 
 //Sends a fixed length packet over USB. Discarded if USB isn't ready.
-void usb_puts(uint8_t *buf, uint32 len)
+uint8_t usb_puts(uint8_t *buf, uint32 len)
 {
 	if(USBUART_1_CDCIsReady() != 0)
+	{
 		USBUART_1_PutData(( const uint8_t*)buf, len);
+		return 1;
+	}
+	
+	return 0;
 }
 
 #endif	//USE_USB

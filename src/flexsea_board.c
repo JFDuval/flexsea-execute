@@ -134,12 +134,12 @@ void flexsea_receive_from_master(void)
 
 uint8_t getDeviceId()
 {
-	return 1;
+	//ToDo Replace with valid ID function
+	return 66;
 }
 uint8_t getDeviceType()
 {
-	//return FX_EXECUTE;
-	return FX_MANAGE;	//ToDo remove, test only
+	return FX_EXECUTE;
 }
 
 uint8_t getBoardID(void)

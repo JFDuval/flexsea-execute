@@ -49,6 +49,7 @@
 
 void initLocalComm(void);
 void parseMasterCommands(uint8_t *new_cmd);
+void autoStream(void);
 void sendMasterDelayedResponse(void);
 
 //****************************************************************************
