@@ -432,5 +432,4 @@ void calc_motor_L(void)
 	globvar[0] = as5047.signed_ang_vel;
 	globvar[1] = currs.avg;
 	induc_amp = ((mot_induc*(as5047.signed_ang_vel)*currs.avg)/safety_cop.v_vb_mv)/149;
-}
-	
+}	
