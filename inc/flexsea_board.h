@@ -74,37 +74,28 @@ uint8_t getDeviceType();
 //How many possible masters?
 #define COMM_MASTERS				3
 
-//Slave Read Buffer Size:
-#define SLAVE_READ_BUFFER_LEN		32	//ToDo TBD
-
-//Enabled the required FlexSEA Buffers for this board:
-#define ENABLE_FLEXSEA_BUF_1		//RS-485
-#define ENABLE_FLEXSEA_BUF_2		//USB
-#define ENABLE_FLEXSEA_BUF_3		//Radio-module
-//#define ENABLE_FLEXSEA_BUF_4		//In the future: battery board?
-
 //Overload buffer & function names (for user convenience):
 
-#define comm_str_485_1					comm_str_1
-#define unpack_payload_485				unpack_payload_1
-#define rx_command_485					rx_command_1
+//#define comm_str_485_1					comm_str_1
+//#define unpack_payload_485				unpack_payload_1
+//#define rx_command_485					rx_command_1
 //#define update_rx_buf_byte_485			update_rx_buf_byte_1
 //#define update_rx_buf_array_485			update_rx_buf_array_1
 #define update_rx_buf_485(x, y)			circ_buff_write(commPeriph[PORT_RS485_1].rx.circularBuff, (x), (y))
 
-#define comm_str_usb					comm_str_2
-#define unpack_payload_usb				unpack_payload_2
-#define rx_command_usb					rx_command_2
+//#define comm_str_usb					comm_str_2
+//#define unpack_payload_usb				unpack_payload_2
+//#define rx_command_usb					rx_command_2
 //#define update_rx_buf_byte_usb			update_rx_buf_byte_2
 //#define update_rx_buf_array_usb			update_rx_buf_array_2
 #define update_rx_buf_usb(x, y)			circ_buff_write(commPeriph[PORT_USB].rx.circularBuff, (x), (y))
 
-#define comm_str_wireless				comm_str_3
-#define unpack_payload_wireless			unpack_payload_3
-#define rx_command_wireless				rx_command_3
+//#define comm_str_wireless				comm_str_3
+//#define unpack_payload_wireless			unpack_payload_3
+//#define rx_command_wireless				rx_command_3
 //#define update_rx_buf_byte_wireless		update_rx_buf_byte_3
 //#define update_rx_buf_array_wireless	update_rx_buf_array_3
-#define update_rx_buf_wireless(x, y)		circ_buff_write(commPeriph[PORT_EXP].rx.circularBuff, (x), (y))
+#define update_rx_buf_wireless(x, y)		circ_buff_write(commPeriph[PORT_WIRELESS].rx.circularBuff, (x), (y))
 
 //===============
 //</FlexSEA User>
@@ -116,5 +107,7 @@ uint8_t getDeviceType();
 //****************************************************************************
 // Shared variable(s)
 //****************************************************************************
+
+extern PortType masterSlave[NUMBER_OF_PORTS];
 
 #endif	//INC_FLEXSEA_BOARD_H

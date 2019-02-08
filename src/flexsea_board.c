@@ -47,6 +47,8 @@
 // Variable(s)
 //****************************************************************************
 
+PortType masterSlave[NUMBER_OF_PORTS] = {MASTER, MASTER, MASTER};
+
 //Board ID (this board) - pick from Board list in flexsea_system.h
 uint8_t board_id = FLEXSEA_EXECUTE_1;	//Can be modified in in user.c/h!
 uint8_t board_up_id = FLEXSEA_MANAGE_1;

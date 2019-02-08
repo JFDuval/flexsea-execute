@@ -54,19 +54,17 @@
 //Prepares the structures:
 void initLocalComm(void)
 {
-	//Default state:
-	initCommPeriph(&commPeriph[PORT_RS485_1], PORT_RS485_1, MASTER, \
-			comm_str_1, rx_command_1, &rx_buf_circ_1, \
-			&packet[PORT_RS485_1][INBOUND], &packet[PORT_RS485_1][OUTBOUND]);
-	initCommPeriph(&commPeriph[PORT_USB], PORT_USB, MASTER, \
-			comm_str_2, rx_command_2, &rx_buf_circ_2, \
-			&packet[PORT_USB][INBOUND], &packet[PORT_USB][OUTBOUND]);
-	initCommPeriph(&commPeriph[PORT_WIRELESS], PORT_WIRELESS, MASTER, \
-			comm_str_3, rx_command_3, &rx_buf_circ_3, \
-			&packet[PORT_WIRELESS][INBOUND], &packet[PORT_WIRELESS][OUTBOUND]);
+	uint8_t i;
+	for(i = 0; i < NUMBER_OF_PORTS; i++)
+	{
+		//Multi-packet:
+		//initMultiPeriph(comm_multi_periph+i, i, masterSlave[i]);
 
-	//Personalize specific fields:
-	//...
+		//Single packets:
+		initCommPeriph(&commPeriph[i], i, masterSlave[i], \
+				comm_str[i], rx_command[i], &rx_buf_circ[i], \
+				&packet[i][INBOUND], &packet[i][OUTBOUND]);
+	}
 }
 
 //Did we receive new commands? Can we parse them?
