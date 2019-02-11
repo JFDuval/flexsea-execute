@@ -39,6 +39,12 @@
 #include "misc.h"
 #include "user-ex.h"
 #include <flexsea_comm.h>
+#include "imu.h"
+#include "control.h"
+#include "analog.h"
+#include "safety.h"
+#include "strain.h"
+#include "flexsea_global_structs.h"
 //(Add #include as needed when running test code)
 
 //****************************************************************************
@@ -89,6 +95,72 @@ uint8_t timebase_100ms(void)
 	}
 	
 	return 0;
+}
+
+//Fill exec1 with latest sensor values:
+void refreshExStructureData(void)
+{
+	#ifdef USE_IMU
+	exec1.accel.x = imu.accel.x;
+	exec1.accel.y = imu.accel.y;
+	exec1.accel.z = imu.accel.z;
+	exec1.gyro.x = imu.gyro.x;
+	exec1.gyro.y = imu.gyro.y;
+	exec1.gyro.z = imu.gyro.z;
+	#endif
+
+    #ifdef USE_STRAIN
+	exec1.strain = strain_read();
+    #endif
+
+	exec1.analog[0] = read_analog(0);
+	exec1.analog[1] = read_analog(1);
+	
+	exec1.current = ctrl[0].current.actual_val;
+	
+	exec1.volt_batt = safety_cop.v_vb;
+	exec1.volt_int = safety_cop.v_vg;
+	exec1.temp = safety_cop.temperature;
+	
+	//Decode some values:
+	decodeExData(&exec1);
+}
+
+//ToDo: replace float calculation by integer math
+void decodeExData(struct execute_s *exPtr)
+{
+	//Accel in mG
+	exPtr->decoded.accel.x = (1000*exPtr->accel.x)/8192;
+	exPtr->decoded.accel.y = (1000*exPtr->accel.y)/8192;
+	exPtr->decoded.accel.z = (1000*exPtr->accel.z)/8192;
+
+	//Gyro in degrees/s
+	exPtr->decoded.gyro.x = (100*exPtr->gyro.x)/164;
+	exPtr->decoded.gyro.y = (100*exPtr->gyro.y)/164;
+	exPtr->decoded.gyro.z = (100*exPtr->gyro.z)/164;
+
+	exPtr->decoded.strain = 0;
+
+	exPtr->decoded.current = exPtr->current;   //1mA/bit for sine comm.
+
+	exPtr->decoded.volt_batt = (int32_t)1000*P4_ADC_SUPPLY*((16*\
+						(float)exPtr->volt_batt/3 + 302 ) \
+						/P4_ADC_MAX) / 0.0738;          //mV
+
+	exPtr->decoded.volt_int = (int32_t)1000*P4_ADC_SUPPLY*((26*\
+						(float)exPtr->volt_int/3 + 440 ) \
+						/P4_ADC_MAX) / 0.43;            //mV
+
+	exPtr->decoded.temp = ((1300*exPtr->temp + 20500)/2048) - 50;
+
+	exPtr->decoded.analog[0] = 0;
+	exPtr->decoded.analog[1] = 0;
+	exPtr->decoded.analog[2] = 0;
+	exPtr->decoded.analog[3] = 0;
+	exPtr->decoded.analog[4] = 0;
+	exPtr->decoded.analog[5] = 0;
+	exPtr->decoded.analog[6] = 0;
+	exPtr->decoded.analog[7] = 0;
 }
 
 void test_code_blocking(void)

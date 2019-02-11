@@ -37,6 +37,7 @@
 //****************************************************************************
 	
 #include "main.h"
+#include "flexsea_global_structs.h"
 	
 //****************************************************************************
 // Shared variable(s)
@@ -65,6 +66,8 @@ void test_code_blocking(void);
 void test_code_non_blocking(void);
 uint8_t timebase_1s(void);
 uint8_t timebase_100ms(void);
+void refreshExStructureData(void);
+void decodeExData(struct execute_s *exPtr);
 uint8_t unwrap_buffer(uint8_t *array, uint8_t *new_array, uint32_t len);
 void bootManage(void);
 
@@ -73,5 +76,15 @@ void bootManage(void);
 //****************************************************************************
 
 #define SDELAY	5
+
+//PSoC 5 ADC conversions:
+#define P5_ADC_SUPPLY				5.0
+#define P5_ADC_MAX					4096
+
+//PSoC 4 ADC conversions:
+#define P4_ADC_SUPPLY				5.0
+#define P4_ADC_MAX					2048
+#define P4_T0						0.5
+#define P4_TC						0.01
 	
 #endif	//INC_MISC_H

@@ -94,6 +94,8 @@ void mainFSM0(void)
 //Case 1: I2C_1
 void mainFSM1(void)
 {
+	refreshExStructureData();
+	
 	//Read from Safety Co-Processor
 	#ifdef USE_I2C_1
 	
