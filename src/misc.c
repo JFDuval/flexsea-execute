@@ -121,6 +121,8 @@ void refreshExStructureData(void)
 	exec1.volt_batt = safety_cop.v_vb;
 	exec1.volt_int = safety_cop.v_vg;
 	exec1.temp = safety_cop.temperature;
+	exec1.status1 = safety_cop.status1;
+	exec1.status2 = safety_cop.status2;
 	
 	//Decode some values:
 	decodeExData(&exec1);
