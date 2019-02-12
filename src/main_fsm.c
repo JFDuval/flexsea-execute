@@ -251,33 +251,6 @@ void mainFSM6(void)
 //Case 7:
 void mainFSM7(void)
 {
-	/*
-	static int sinceLastStreamSend[MAX_STREAMS] = {0};
-	if(isStreaming)
-	{
-		int i;
-		for(i=0;i<isStreaming;i++)
-			sinceLastStreamSend[i]++;
-		
-		for(i=0;i<isStreaming;i++)
-		{
-			if(sinceLastStreamSend[i] >= streamPeriods[i])
-			{
-				//hopefully this works ok - assumption is that rx_r pure reads take no info from the cp_str
-				uint8_t cp_str[256] = {0};
-				cp_str[P_XID] = streamReceivers[i];
-				(*flexsea_payload_ptr[streamCmds[i]][RX_PTYPE_READ]) (cp_str, &streamPortInfos[i]);	
-				
-				sinceLastStreamSend[i] -= streamPeriods[i];
-				
-				//we return to avoid sending two msgs in one cycle
-				//since counters were already incremented, we will still try to hit other stream frequencies
-				return;
-			}
-		}
-	}
-	*/
-	
 	//Timestamp needed by GUI:
 	rigid1.ctrl.timestamp++;
 }

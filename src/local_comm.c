@@ -133,7 +133,6 @@ static int sinceLastStreamSend[MAX_STREAMS] = {0};
 
 void autoStream(void)
 {
-
 	if(isStreaming)
 	{
 		int i;
@@ -148,7 +147,6 @@ void autoStream(void)
 			{
 				if(isMultiAutoStream(streamCmds[i]))
 				{
-
 					MultiCommPeriph *cp = comm_multi_periph + streamPortInfos[i];
 					pInfo.xid = streamReceivers[i];
 					pInfo.rid = getDeviceId();
@@ -161,12 +159,12 @@ void autoStream(void)
 					cp->in.unpacked[0] = 0;
 					uint8_t error = receiveAndFillResponse(streamCmds[i], RX_PTYPE_READ, &pInfo, cp);
 					if(error)
+					{
 						cp->out.unpackedIdx = 0;
-
+					}
 				}
 				else
 				{
-
 					//Determine what offset to use:
 					streamCurrentOffset[i]++;
 					if(streamCurrentOffset[i] > streamIndex[i][1])
