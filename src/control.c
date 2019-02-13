@@ -28,9 +28,6 @@
 	*
 ****************************************************************************/
 
-//Comment the next line to disable the velocity feed-forward term:
-#define USE_FEED_FORWARD
-
 //****************************************************************************
 // Include(s)
 //****************************************************************************
@@ -92,7 +89,7 @@ void control_strategy(uint8_t strat, uint8_t ch)
 		ctrl[ch].current.gain.I_KI = 0;
 		ctrl[ch].current.gain.I_KD = 0;
 		ctrl[ch].current.setpoint_val = 0;
-        ctrl[ch].current.error_sum = 0;
+		ctrl[ch].current.error_sum = 0;
 		
 		//To avoid a huge startup error on the Position-based controllers:
 		if(strat == CTRL_POSITION)
@@ -105,15 +102,16 @@ void control_strategy(uint8_t strat, uint8_t ch)
 			ctrl[ch].impedance.setpoint_val = refresh_enc_control(ch);
 			steps = trapez_gen_motion_1(ctrl[ch].impedance.setpoint_val, ctrl[ch].impedance.setpoint_val, 1, 1);
 		}
-        
-        if (strat != CTRL_MEASRES)
-        {
-            measure_motor_resistance = 0;
-        }
-        else
-        {
-            measure_motor_resistance = 1;
-        }
+		
+		//ToDo: pretty sure we won't use that as a control mode anymore. Remove.
+		if (strat != CTRL_MEASRES)
+		{
+			measure_motor_resistance = 0;
+		}
+		else
+		{
+			measure_motor_resistance = 1;
+		}
 		
 		ctrl[ch].active_ctrl = strat;
 		in_control.controller = ctrl[ch].active_ctrl;
@@ -166,7 +164,7 @@ void init_ctrl_data_structure(void)
 		ctrl[ch].impedance.gain.g4 = 0;
 		ctrl[ch].impedance.gain.g5 = 0;
 		ctrl[ch].impedance.actual_val = 0;
-	    ctrl[ch].impedance.actual_vel = 0;
+		ctrl[ch].impedance.actual_vel = 0;
 		ctrl[ch].impedance.setpoint_val = 0;
 		ctrl[ch].impedance.error = 0;
 		ctrl[ch].impedance.error_sum = 0;
@@ -215,25 +213,22 @@ int32 motor_position_pid(int32 wanted_pos, int32 actual_pos, uint8_t ch)
 		ctrl[ch].position.error_sum = -MAX_ERR_SUM;
 	
 	//Proportional term
-	p = (ctrl[ch].position.gain.P_KP * ctrl[ch].position.error) / 100;
+	p = (int32_t)((int32_t)ctrl[ch].position.gain.P_KP * ctrl[ch].position.error) / 100;
 	in_control.r[0] = p;
 	//Integral term
-	i = (ctrl[ch].position.gain.P_KI * ctrl[ch].position.error_sum) / 5000;
+	i = (int32_t)((int32_t)ctrl[ch].position.gain.P_KI * ctrl[ch].position.error_sum/10) / 100;
 	in_control.r[1] = i;
 	//Differential term:
-	d = (ctrl[ch].position.gain.P_KD * ctrl[ch].position.error_dif) / 100;
+	d = (int32_t)((int32_t)ctrl[ch].position.gain.P_KD * ctrl[ch].position.error_dif) / 100;
 	in_control.r[2] = d;
 	
 	//Output
 	pwm = (p + i + d);		//
 	
-	//Saturates PWM to low values
-	if(pwm >= PWM_SAT)
-		pwm = PWM_SAT;
-	if(pwm <= -PWM_SAT)
-		pwm = -PWM_SAT;
+	//(Saturation happens in setMotorVoltage(), if needed)
 	
-	motor_open_speed_1(pwm);
+	setMotorVoltage(pwm, ch);
+	//motor_open_speed_1(pwm);
 	in_control.output = pwm;
 	
 	return ctrl[ch].position.error;
@@ -262,9 +257,9 @@ int32 motor_position_pid_ff_1(int32 wanted_pos, int32 actual_pos, int32 ff, uint
 		ctrl[ch].position.error_sum = -MAX_CUMULATIVE_ERROR;
 	
 	//Proportional term
-	p = (ctrl[ch].position.gain.P_KP * ctrl[ch].position.error) / 100;
+	p = (int32_t)((int32_t)ctrl[ch].position.gain.P_KP * ctrl[ch].position.error) / 100;
 	//Integral term
-	i = (ctrl[ch].position.gain.P_KI * ctrl[ch].position.error_sum) / 100;
+	i = (int32_t)((int32_t)ctrl[ch].position.gain.P_KI * ctrl[ch].position.error_sum) / 100;
 	//Derivative term
 	d = 0;	//ToDo
 	
@@ -277,7 +272,7 @@ int32 motor_position_pid_ff_1(int32 wanted_pos, int32 actual_pos, int32 ff, uint
 	if(pwm <= -POS_PWM_LIMIT)
 		pwm = -POS_PWM_LIMIT;
 	
-	motor_open_speed_1(pwm);
+	setMotorVoltage(pwm, ch);
 	
 	return ctrl[ch].position.error;
 }
@@ -288,37 +283,30 @@ int32 motor_position_pid_ff_1(int32 wanted_pos, int32 actual_pos, int32 ff, uint
 inline int32 motor_current_pid_3(int32 wanted_curr, int32 measured_curr, uint8_t ch)
 {
 	int32_t sign = 0;
-    //Clip out of range values
-	//if(wanted_curr >= CURRENT_POS_LIMIT)
-	//	wanted_curr = CURRENT_POS_LIMIT;	
 	
 	//Error and integral of errors:
-	ctrl[ch].current.error = (wanted_curr - measured_curr);					//Actual error
+	ctrl[ch].current.error = (wanted_curr - measured_curr);	//Actual error
 	ctrl[ch].current.error_sum += ctrl[ch].current.error;	//Cumulative error
 	
 	//Saturate cumulative error
 	if(ctrl[ch].current.error_sum >= MAX_CUM_CURRENT_ERROR)
 		ctrl[ch].current.error_sum = MAX_CUM_CURRENT_ERROR;
 	if(ctrl[ch].current.error_sum <= -MAX_CUM_CURRENT_ERROR)
-		ctrl[ch].current.error_sum = -MAX_CUM_CURRENT_ERROR;	
+		ctrl[ch].current.error_sum = -MAX_CUM_CURRENT_ERROR;
 
 	//Proportional term
-	volatile int32 curr_p = (int) ((ctrl[ch].current.gain.I_KP * ctrl[ch].current.error)>>8);
+	volatile int32 curr_p = (int)((ctrl[ch].current.gain.I_KP * ctrl[ch].current.error)>>8);
 	//Integral term
-	volatile int32 curr_i = (int)((ctrl[ch].current.error_sum)>>13);
+	volatile int32 curr_i = (int)((ctrl[ch].current.gain.I_KI * ctrl[ch].current.error_sum)>>13);
 	//Add differential term here if needed
 	//In both cases we divide to get a finer gain adjustement w/ integer values.
 
 	//Output
-	#ifdef USE_FEED_FORWARD
-		volatile int32 curr_pwm = curr_p + curr_i + as5047.signed_ang_vel*37 + wanted_curr/10;
-	#else
-		volatile int32 curr_pwm = curr_p + curr_i;
-	#endif	//USE_FEED_FORWARD
+	volatile int32 curr_pwm = curr_p + curr_i + as5047.signed_ang_vel*37 + wanted_curr/10;
 	
 	#if(MOTOR_COMMUT == COMMUT_SINE) 
 
-        motor_open_speed_1(curr_pwm);
+		setMotorVoltage(curr_pwm, ch);
 	
 	#endif
 		
@@ -347,20 +335,20 @@ inline int32 motor_current_pid_3(int32 wanted_curr, int32 measured_curr, uint8_t
 		CY_SET_REG16(PWM_1_COMPARE2_LSB_PTR, (uint16)(PWM2DC(curr_pwm)));
 		//Compare 2 can't be 0 or the ADC won't trigger => that's why I'm adding 1
 	#endif
-        
-	return ctrl[ch].current.error;    
+		
+	return ctrl[ch].current.error;	
 }
 
 //Impedance controller
 void impedance_controller(uint8_t ch)
 {
-    int32 spring_torq; 
-    int32 damping_torq;
+	int32 spring_torq; 
+	int32 damping_torq;
 
-    spring_torq = ((ctrl[ch].impedance.setpoint_val-ctrl[ch].impedance.actual_val)*ctrl[ch].impedance.gain.g0)>>4;
-    damping_torq = (-1*(ctrl[ch].impedance.actual_vel)*ctrl[ch].impedance.gain.g1);
-    
-    ctrl[ch].current.setpoint_val = (spring_torq+damping_torq);
+	spring_torq = ((ctrl[ch].impedance.setpoint_val-ctrl[ch].impedance.actual_val)*ctrl[ch].impedance.gain.g0)>>9;
+	damping_torq = (-1*(ctrl[ch].impedance.actual_vel)*ctrl[ch].impedance.gain.g1)>>6;
+	
+	ctrl[ch].current.setpoint_val = (spring_torq+damping_torq);
 }
 
 //in_control.combined = [CTRL2:0][MOT_DIR][PWM]

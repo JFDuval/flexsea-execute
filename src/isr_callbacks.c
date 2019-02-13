@@ -198,7 +198,7 @@ void isr_spi_tx_Interrupt_InterruptCallback()
 		//Next transfer:
 		spi_isr_state++;
 		//SPIM_1_WriteTxData(as5047_empty_read);
-		CY_SET_REG16(SPIM_1_TXDATA_PTR,as5047_empty_read);
+		CY_SET_REG16(SPIM_1_TXDATA_PTR, as5047_empty_read);
 	}
 	else
 	{
@@ -207,15 +207,15 @@ void isr_spi_tx_Interrupt_InterruptCallback()
 		as5047_angle = (spidata_miso[spi_isr_state] & 0x3FFF);
 		spi_read_flag = 1;
 		update_as504x_absang(as5047_angle, &as5047);
-		sensor_sin_commut(as5047.ang_comp_clks>>3, exec1.sine_commut_pwm);
+		sensor_sin_commut(as5047.ang_comp_clks >> 3, exec1.sine_commut_pwm);
 
-		if (update_current_flag)
+		if(update_current_flag)
 		{
-		update_current_arrays();
-		update_current_flag = 0;
+			update_current_arrays();
+			update_current_flag = 0;
 		}
 		
-		if (velcounter>=20)
+		if(velcounter >= 20)
 		{
 			//Encoder velocity estimation:
 			//update_as504x_contang(&as5047);
@@ -224,9 +224,9 @@ void isr_spi_tx_Interrupt_InterruptCallback()
 		}
 		velcounter++;
 
-		if (counter<20000)
+		if(counter < 20000)
 		{
-			if (counter>14000){set_current_zero();}
+			if(counter > 14000){set_current_zero();}
 			counter++;
 		}
 		

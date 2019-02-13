@@ -68,6 +68,9 @@ uint8_t criticalError(uint8_t reset);
 
 uint8_t I2C_1_MasterWriteByteTimeOut(uint8_t theByte, uint32 timeout);
 
+uint16_t getDrooplessBatteryVoltage(uint8_t *inRange);
+uint8_t isBatteryVoltageInRange(uint16_t vb);
+
 //****************************************************************************
 // Shared Variable(s):
 //****************************************************************************
@@ -79,47 +82,53 @@ extern struct scop safety_cop;
 //****************************************************************************
 
 //Safety-CoP I2C:
-#define SCOP_I2C_ADDR			0x11
+#define SCOP_I2C_ADDR				0x11
 
 //Limits:
-#define MAX_DIE_TEMP			75
+#define MAX_DIE_TEMP				75
+
+//Droopless battery voltage:
+#define DLBATT_LAG					10
+#define MIN_BATT_VOLT				17000
+#define MAX_BATT_VOLT				54000
+#define MAX_COMMANDABLE_MOT_VOLT	50000
 
 //EZI2C Shared memory locations:
-#define MEM_W_CONTROL1			0
-#define MEM_W_CONTROL2			1
-//#define UNUSED				2
-//#define UNUSED				3
-//#define UNUSED				4
-//#define UNUSED				5
-//#define UNUSED				6
-//#define UNUSED				7
-#define MEM_R_STATUS1			8
-#define MEM_R_STATUS2			9
-#define MEM_R_VB_SNS			10
-#define MEM_R_VG_SNS			11
-#define MEM_R_5V_SNS			12
-#define MEM_R_3V3_SNS			13
-#define MEM_R_TEMPERATURE		14
-//#define UNUSED				15
-//#define UNUSED				16
-//#define UNUSED				17
-//#define UNUSED				18
-//#define UNUSED				19
-//#define UNUSED				20
-//#define UNUSED				21
-//#define UNUSED				22
-//#define UNUSED				23
+#define MEM_W_CONTROL1				0
+#define MEM_W_CONTROL2				1
+//#define UNUSED					2
+//#define UNUSED					3
+//#define UNUSED					4
+//#define UNUSED					5
+//#define UNUSED					6
+//#define UNUSED					7
+#define MEM_R_STATUS1				8
+#define MEM_R_STATUS2				9
+#define MEM_R_VB_SNS				10
+#define MEM_R_VG_SNS				11
+#define MEM_R_5V_SNS				12
+#define MEM_R_3V3_SNS				13
+#define MEM_R_TEMPERATURE			14
+//#define UNUSED					15
+//#define UNUSED					16
+//#define UNUSED					17
+//#define UNUSED					18
+//#define UNUSED					19
+//#define UNUSED					20
+//#define UNUSED					21
+//#define UNUSED					22
+//#define UNUSED					23
 
 //STATUS1 Values:
-#define STATUS1_GOOD			100
-#define STATUS1_ERROR			50
+#define STATUS1_GOOD				100
+#define STATUS1_ERROR				50
 
 //How many 1ms cycles do we skip before we start looking at safety flags?
-#define SAFETY_DELAY			1000
+#define SAFETY_DELAY				1000
 
-#define T_NORMAL				0
-#define T_WARNING				1
-#define T_ERROR					2
+#define T_NORMAL					0
+#define T_WARNING					1
+#define T_ERROR						2
 
 //STATUS1 = [WDCLK, DISCON, TEMPH, TEMPL, VBH, VBL, VGH, VGL]
 #define CMB_FLAGS_STATUS1(err_wdclk, err_discon, err_temp, err_v_vb, err_v_vg) \

@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Document xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" release="PSoC Creator  4.1" xmlns="http://cypress.com/xsd/cysem">
+<Document xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" release="PSoC Creator  4.2" xmlns="http://cypress.com/xsd/cysem">
   <Instances count="140">
     <Instance guid="02f2cf2c-2c7a-49df-9246-7a3435c21be3" name="SCL_1" component="cy_pins_v2_20">
       <Parameter name="CY_COMMENT">

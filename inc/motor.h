@@ -70,6 +70,13 @@ void setDmaPwmCompare(uint16_t a, uint16_t b, uint16_t c);
 #define PWM1DC(x)					MAX(x, (P1_DEADTIME+2))
 #define PWM2DC(x)					MAX(((x - P1_DEADTIME)>>1), 10)
 
+//Motor voltage vs PWM:
+//Actual ouput of mosfet V = pwm*Vb/1000
+//If the amp of the sin wave is V then the line-to-line voltage is = Vll = V*(3^.5) = (3^.5)*pwm*Vb/1000 = pwm*Vb/577
+//If you want the pwm for the corresponding Vll then pwm = 577*Vll/Vb
+#define GET_PWM_FROM_V(v,vb) 		(((int32_t)v * 577)/((int32_t)vb))
+#define GET_V_FROM_PWM(pwm,vb)		(((int32_t)pwm * (int32_t)vb)/577)
+
 //Common definitions, DMA_Px:
 #define DMA_PX_BYTES_PER_BURST 		2
 #define DMA_PX_REQUEST_PER_BURST 	1

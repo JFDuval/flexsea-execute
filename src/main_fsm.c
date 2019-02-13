@@ -207,6 +207,17 @@ void mainFSM6(void)
 {
 	uint8_t ch = 0;
 	
+	//Comm:
+	int i;
+	for(i = 0; i < NUMBER_OF_PORTS; ++i)
+	{
+		if(comm_multi_periph[i].out.unpackedIdx)
+		{
+			packMultiPacket(&(comm_multi_periph[i].out));
+			comm_multi_periph[i].out.unpackedIdx = 0;
+		}
+	}
+	
 	// If we are running a calibration test, all controllers should be disabled anyways.
 	// Also we should be in CTRL_NONE, but that should be handled elsewhere
 	if(calibrationFlags != 0)
@@ -234,17 +245,6 @@ void mainFSM6(void)
 	{
 		ctrl[ch].active_ctrl = CTRL_NONE;
 		setMotorVoltage(0, ch);
-	}
-	
-	//Comm:
-	int i;
-	for(i = 0; i < NUMBER_OF_PORTS; ++i)
-	{
-		if(comm_multi_periph[i].out.unpackedIdx)
-		{
-			packMultiPacket(&(comm_multi_periph[i].out));
-			comm_multi_periph[i].out.unpackedIdx = 0;
-		}
 	}
 }
 

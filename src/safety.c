@@ -56,7 +56,6 @@ uint8_t safety_cop_data[24] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 //Update the global variables from the array
 void decode_psoc4_values(uint8_t *psoc4_data)
 {
-	
 	static int32_t bat_volt_counter = 0;
 	if (psoc4_data[MEM_R_VB_SNS]>=safety_cop.v_vb) //all of this complicatedness is because the bat_voltage spikes down when under current
 	{
@@ -351,6 +350,57 @@ uint8_t criticalError(uint8_t reset)
 	
 	//Return 0 when normal, 1 when under error
 	return latchedOutput;
+}
+
+//This function cancels out any short negative spike on rigid1.re.vb
+//It returns a voltage, in mV. If it's invalid, it returns 1 (never 0).
+//*inRange can be used for other safety mecanisms
+uint16_t getDrooplessBatteryVoltage(uint8_t *inRange)
+{	
+	static int32_t bat_volt_counter = 0;
+	#ifdef BOARD_SUBTYPE_RIGID
+	uint16_t vb = rigid1.re.vb;		//Last measurement
+	#else
+	uint16_t vb = safety_cop.v_vb_mv;
+	#endif
+	static uint16_t last_vb = 0;	//Previous value
+	static int32_t retVal = 1;
+	
+	if(vb >= last_vb)
+	{
+		//Equal or superior values are used immediatly
+		retVal = vb;
+		bat_volt_counter = 0;
+	}
+	else
+	{
+		//If it's lower, we react very slowly:
+		bat_volt_counter++;
+		if(bat_volt_counter > DLBATT_LAG)
+		{
+			retVal--;
+			bat_volt_counter = 0;
+		}
+	}
+		
+	last_vb = vb;
+	
+	//Voltage in range?
+	if(isBatteryVoltageInRange(retVal)){(*inRange) = 1;}
+	else{(*inRange) = 0;}
+	
+	//Protections:
+	if(retVal <= 16000){retVal = 16000;}	//No div/0
+	if(retVal >= 65535){retVal = 65535;}	//No uint16 rollover
+	
+	return ((uint16_t)retVal);
+}
+
+//Returns 1 is yes, 0 otherwise
+uint8_t isBatteryVoltageInRange(uint16_t vb)
+{
+	if((vb >= MIN_BATT_VOLT) && (vb <= MAX_BATT_VOLT)){return 1;}
+	else{return 0;}
 }
 
 //****************************************************************************

@@ -48,6 +48,7 @@
 #include "mem_angle.h"
 #include "sensor_commut.h"
 #include "dynamic_user_structs.h"
+#include "main_fsm.h"
 
 //****************************************************************************
 // Variable(s)
@@ -129,13 +130,66 @@ void init_motor(void)
 
 void setMotorVoltage(int32 mV, uint8_t ch)
 {
-	(void)ch;
-	motor_open_speed_1(mV);
+	int32_t v = (int32_t)mV;
+	int32_t pwmToApply = 0, vb = 0;
+	uint8_t inRange = 0;
+	
+	//Impose a max magnitude on user input voltage
+	v = (v > MAX_COMMANDABLE_MOT_VOLT) ? MAX_COMMANDABLE_MOT_VOLT : v;
+	v = (v < -1*MAX_COMMANDABLE_MOT_VOLT) ? -1*MAX_COMMANDABLE_MOT_VOLT : v;
+	
+	//only set a pwm if we have a legal/valid battery voltage
+	vb = getDrooplessBatteryVoltage(&inRange);
+	if(inRange){pwmToApply = GET_PWM_FROM_V(v,vb);}
+	else{pwmToApply = 0;}
+	
+	//Safety code can disable motor:
+	if(suppressMotor){pwmToApply = 0;}
+	
+		#if (MOTOR_COMMUT == COMMUT_BLOCK)
+		
+		uint16 tmp = 0;
+	
+		 //Clip PWM to valid range
+		if(pwm_duty >= MAX_PWM)
+			pdc = MAX_PWM;
+		else if(pwm_duty <= MIN_PWM)
+			pdc = MIN_PWM;
+		else
+			pdc = pwm_duty;
+		
+		//User defined sign:
+		pdc = pdc * PWM_SIGN;
+		
+		//Save value to structure:
+		ctrl.pwm = pdc;
+		
+		//Change direction according to sign
+		if(pdc < 0)
+		{
+			pdc = -pdc;	//Make it positive
+			MotorDirection_Write(0);
+
+		}
+		else
+		{
+			MotorDirection_Write(1);
+		}
+		
+		//Write duty cycle to PWM module
+		tmp = PWM1DC((uint16)pdc);
+		PWM_1_WriteCompare1(tmp);
+		PWM_1_WriteCompare2(PWM2DC(tmp));	//Can't be 0 or the ADC won't trigger
+		
+	#else
+		exec1.sine_commut_pwm = MOTOR_ORIENTATION*(int16_t)(pwmToApply);
+	#endif
 }
 
 // takes as an argument the voltage to set the motor to, in milliVolts
 // applies a PWM to the motor, considering the nonlinear relationship between PWM and motor voltage
 // also accounts for the linear relationship between motor voltage & battery voltage
+// Important: keeping this for legacy reason - use with care
 void motor_open_speed_1(int32 voltageToApply)
 {
 	const int32_t MAX_VOLTAGE = 50000;
@@ -150,10 +204,10 @@ void motor_open_speed_1(int32 voltageToApply)
 	
 	int32_t pwmToApply = 0;
 
-	
 	//only set a pwm if we have a legal/valid battery voltage
 	if(17000 <  safety_cop.v_vb_mv &&  safety_cop.v_vb_mv < 54000)
 	{	
+		//Not sure this is right... different than Ex's formula
 		pwmToApply = (v*76) / ( safety_cop.v_vb_mv>>4);
 	}
 	

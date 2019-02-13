@@ -124,7 +124,7 @@ void adc_sar2_dma_config(void)
 	#endif
 	
 	//X transfers per ISR (2X bytes):
-	DMA_1_Chan = DMA_1_DmaInitialize(DMA_1_BYTES_PER_BURST, DMA_1_REQUEST_PER_BURST, 
+	DMA_1_Chan = DMA_1_DmaInitialize(DMA_1_BYTES_PER_BURST, DMA_1_REQUEST_PER_BURST,
 		HI16(DMA_1_SRC_BASE), HI16(DMA_1_DST_BASE));
 	DMA_1_TD[0] = CyDmaTdAllocate();
 	CyDmaTdSetConfiguration(DMA_1_TD[0], xferLen, DMA_1_TD[0], DMA_1__TD_TERMOUT_EN | TD_INC_DST_ADR);
@@ -136,7 +136,7 @@ void adc_sar2_dma_config(void)
 
 void update_current_arrays(void)
 {
-
+	int32_t lead = 0;
 	adc_dma_array_buf[0] = adc_dma_array[0];
 	adc_dma_array_buf[1] = adc_dma_array[1];
 	adc_dma_array_buf[2] = adc_dma_array[2];
@@ -155,74 +155,78 @@ void update_current_arrays(void)
 	phase_c_raw = (adc_dma_array_buf[0]-phase_c_zero);
 	phase_a_raw = (adc_dma_array_buf[1]-phase_a_zero);
 	
-	if (measure_motor_resistance)
+	//Normal operation, or resistance measurement?
+	if(measure_motor_resistance)
 	{
-		raw_current = ((int)(phase_a_raw))-((int)(phase_b_raw))-((int)(phase_c_raw));
+		//Phase offset: 90 degrees
+		lead = 4096;
 	}
 	else
 	{
-		#if(MOTOR_COMMUT == COMMUT_SINE)
-			phase_a_ang = ((((-60+user_data_1.w[2])*(as5047.filt_vel_cpms))/1000+(as5047.ang_abs_clks)+16384)%16384);
-			phase_b_ang = ((((-10+user_data_1.w[2])*(as5047.filt_vel_cpms))/1000+(as5047.ang_abs_clks)+16384)%16384);
-			phase_c_ang = ((((-110+user_data_1.w[2])*(as5047.filt_vel_cpms))/1000+(as5047.ang_abs_clks)+16384)%16384);
-			
-			phase_a_com = (int)phaseAcoms[phase_a_ang>>3];
-			phase_b_com = (int)phaseBcoms[phase_b_ang>>3];
-			phase_c_com = (int)phaseCcoms[phase_c_ang>>3];
-			
-			static int32_t cursum,cursomcntr;
-			cursum = 0;
-			cursomcntr = 0;
-			
-			if (phase_a_com>240 || phase_a_com<-240)
-			{
-				cursum += (phase_a_raw*495)/phase_a_com;
-				cursomcntr++;
-			}
-			if (phase_b_com>240 || phase_b_com<-240)
-			{
-				cursum += (phase_b_raw*495)/phase_b_com;
-				cursomcntr++;
-			}
-			if (phase_c_com>240 || phase_c_com<-240)
-			{
-				cursum += (phase_c_raw*495)/phase_c_com;
-				cursomcntr++;
-			}
-			
-			if (cursomcntr>0)
-			{
-				raw_current = -(24*cursum)/cursomcntr;
-			}
-			
-			//This is the amplitude of the current and should be multiplied by the phase torque constant or line-to-line constant / 3^.5
-			 //x 16 mA/IU /2 samples * 3/2 for sum of 3 sin^2		
-		#endif
-		
-		#if((MOTOR_COMMUT == COMMUT_BLOCK) && (CURRENT_SENSING != CS_LEGACY))
-			
-			hallCurr = Status_Reg_1_Read();
-			phase_a_current = currPhase[hallCurr][2]*(phase_a_median-CURRENT_ZERO);
-			phase_b_current = currPhase[hallCurr][1]*(phase_b_median-CURRENT_ZERO);
-			phase_c_current = currPhase[hallCurr][0]*(phase_c_median-CURRENT_ZERO);
-			
-			//Sign based on motor direction
-			if(MotorDirection_Control == 0)
-			{	
-				raw_current = -9*(phase_a_current+phase_b_current+phase_c_current);
-			}
-			else
-			{
-				raw_current = 9*(phase_a_current+phase_b_current+phase_c_current);
-			}
-			
-			
-		#endif
+		lead = 0;
 	}
+	
+	#if(MOTOR_COMMUT == COMMUT_SINE)
+		phase_a_ang = ((((-60)*(as5047.filt_vel_cpms))/1000+(as5047.ang_abs_clks + lead)+16384)%16384);
+		phase_b_ang = ((((-10)*(as5047.filt_vel_cpms))/1000+(as5047.ang_abs_clks + lead)+16384)%16384);
+		phase_c_ang = ((((-110)*(as5047.filt_vel_cpms))/1000+(as5047.ang_abs_clks + lead)+16384)%16384);
+		
+		phase_a_com = (int32_t)phaseAcoms[phase_a_ang>>3];
+		phase_b_com = (int32_t)phaseBcoms[phase_b_ang>>3];
+		phase_c_com = (int32_t)phaseCcoms[phase_c_ang>>3];
+		
+		static int32_t cursum,cursomcntr;
+		cursum = 0;
+		cursomcntr = 0;
+		
+		if(phase_a_com>240 || phase_a_com<-240)
+		{
+			cursum += (phase_a_raw*495)/phase_a_com;
+			cursomcntr++;
+		}
+		if(phase_b_com>240 || phase_b_com<-240)
+		{
+			cursum += (phase_b_raw*495)/phase_b_com;
+			cursomcntr++;
+		}
+		if(phase_c_com>240 || phase_c_com<-240)
+		{
+			cursum += (phase_c_raw*495)/phase_c_com;
+			cursomcntr++;
+		}
+		
+		if(cursomcntr>0)
+		{
+			raw_current = -(24*cursum)/cursomcntr;
+		}
+		
+		//This is the amplitude of the current and should be multiplied by the phase torque constant or line-to-line constant / 3^.5
+		//x 16 mA/IU /2 samples * 3/2 for sum of 3 sin^2
+		//The amplitude of the current in each phase is raw_current / (3/2)
+	#endif
+	
+	#if((MOTOR_COMMUT == COMMUT_BLOCK) && (CURRENT_SENSING != CS_LEGACY))
+		
+		hallCurr = Status_Reg_1_Read();
+		phase_a_current = currPhase[hallCurr][2]*(phase_a_median-CURRENT_ZERO);
+		phase_b_current = currPhase[hallCurr][1]*(phase_b_median-CURRENT_ZERO);
+		phase_c_current = currPhase[hallCurr][0]*(phase_c_median-CURRENT_ZERO);
+		
+		//Sign based on motor direction
+		if(MotorDirection_Control == 0)
+		{	
+			raw_current = -9*(phase_a_current+phase_b_current+phase_c_current);
+		}
+		else
+		{
+			raw_current = 9*(phase_a_current+phase_b_current+phase_c_current);
+		}
+		
+	#endif
+
 	
 	//calculate the new filtered current
 	//the filter outputs raw values x 1024 in order to maintain precision
-	//ctrl[0].current.actual_val = MOTOR_ORIENTATION*filt_array_10khz(motor_currents,motor_currents_filt,40,raw_current); // mAmps where I * the line-to-line motor constant = torque 
 	ctrl[0].current.actual_val = MOTOR_ORIENTATION*raw_current; // mAmps where I * the line-to-line motor constant = torque 
 	update_diffarr(&ctrl[0].current.actual_vals,ctrl[0].current.actual_val,50);
 }
