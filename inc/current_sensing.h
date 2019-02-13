@@ -62,6 +62,16 @@ void adc_sar2_dma_reinit(void);
 #define DMA_1_SRC_BASE 				(CYDEV_PERIPH_BASE)
 #define DMA_1_DST_BASE 				(CYDEV_SRAM_BASE)
 
+//Sine Commut constants:
+//Unclear why I need different values... but currently required
+#ifdef BOARD_SUBTYPE_RIGID
+#define PCOM_TH						480
+#define PCOM_G						1024
+#else
+#define PCOM_TH						240
+#define PCOM_G						495
+#endif
+
 //****************************************************************************
 // Shared variable(s)
 //****************************************************************************

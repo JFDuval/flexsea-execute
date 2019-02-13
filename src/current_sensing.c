@@ -167,6 +167,7 @@ void update_current_arrays(void)
 	}
 	
 	#if(MOTOR_COMMUT == COMMUT_SINE)
+		
 		phase_a_ang = ((((-60)*(as5047.filt_vel_cpms))/1000+(as5047.ang_abs_clks + lead)+16384)%16384);
 		phase_b_ang = ((((-10)*(as5047.filt_vel_cpms))/1000+(as5047.ang_abs_clks + lead)+16384)%16384);
 		phase_c_ang = ((((-110)*(as5047.filt_vel_cpms))/1000+(as5047.ang_abs_clks + lead)+16384)%16384);
@@ -179,19 +180,19 @@ void update_current_arrays(void)
 		cursum = 0;
 		cursomcntr = 0;
 		
-		if(phase_a_com>240 || phase_a_com<-240)
+		if(phase_a_com > PCOM_TH || phase_a_com < (-PCOM_TH))
 		{
-			cursum += (phase_a_raw*495)/phase_a_com;
+			cursum += (phase_a_raw * PCOM_G)/phase_a_com;
 			cursomcntr++;
 		}
-		if(phase_b_com>240 || phase_b_com<-240)
+		if(phase_b_com > PCOM_TH || phase_b_com < (-PCOM_TH))
 		{
-			cursum += (phase_b_raw*495)/phase_b_com;
+			cursum += (phase_b_raw * PCOM_G)/phase_b_com;
 			cursomcntr++;
 		}
-		if(phase_c_com>240 || phase_c_com<-240)
+		if(phase_c_com > PCOM_TH || phase_c_com < (-PCOM_TH))
 		{
-			cursum += (phase_c_raw*495)/phase_c_com;
+			cursum += (phase_c_raw * PCOM_G)/phase_c_com;
 			cursomcntr++;
 		}
 		
@@ -203,6 +204,7 @@ void update_current_arrays(void)
 		//This is the amplitude of the current and should be multiplied by the phase torque constant or line-to-line constant / 3^.5
 		//x 16 mA/IU /2 samples * 3/2 for sum of 3 sin^2
 		//The amplitude of the current in each phase is raw_current / (3/2)
+		
 	#endif
 	
 	#if((MOTOR_COMMUT == COMMUT_BLOCK) && (CURRENT_SENSING != CS_LEGACY))
