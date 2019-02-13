@@ -216,7 +216,7 @@ int32 motor_position_pid(int32 wanted_pos, int32 actual_pos, uint8_t ch)
 	p = (int32_t)((int32_t)ctrl[ch].position.gain.P_KP * ctrl[ch].position.error) / 100;
 	in_control.r[0] = p;
 	//Integral term
-	i = (int32_t)((int32_t)ctrl[ch].position.gain.P_KI * ctrl[ch].position.error_sum/10) / 100;
+	i = (int32_t)((int32_t)ctrl[ch].position.gain.P_KI * (ctrl[ch].position.error_sum/10)) / 250;
 	in_control.r[1] = i;
 	//Differential term:
 	d = (int32_t)((int32_t)ctrl[ch].position.gain.P_KD * ctrl[ch].position.error_dif) / 100;
@@ -228,7 +228,6 @@ int32 motor_position_pid(int32 wanted_pos, int32 actual_pos, uint8_t ch)
 	//(Saturation happens in setMotorVoltage(), if needed)
 	
 	setMotorVoltage(pwm, ch);
-	//motor_open_speed_1(pwm);
 	in_control.output = pwm;
 	
 	return ctrl[ch].position.error;

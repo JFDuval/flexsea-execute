@@ -94,7 +94,7 @@ void in_control_get_pwm_dir(void);
 #define STEP					(PI/STEPS)
 #define DELAY					100
 
-#define MAX_ERR_SUM				10000000
+#define MAX_ERR_SUM				1000000
 #define PWM_SAT					30000	
 
 //ToDo: do we need MAX_CUMULATIVE_ERROR and MAX_ERR_SUM or can they be the same? 
