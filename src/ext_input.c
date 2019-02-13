@@ -75,6 +75,7 @@ int32 refresh_enc_control(uint8_t ch)
 		ctrl[ch].impedance.actual_val = *exec1.enc_ang;
 		ctrl[ch].impedance.actual_vel = *exec1.enc_ang_vel;
 		ctrl[ch].position.pos = *exec1.enc_ang;
+		exec1._enc_ang_ = *exec1.enc_ang;
 		return *(exec1.enc_ang);
 	#elif(ENC_CONTROL == ENC_AS5048B)
 		ctrl[ch].impedance.actual_val = *(exec1.enc_ang);
