@@ -62,7 +62,7 @@ void initLocalComm(void)
 	for(i = 0; i < NUMBER_OF_PORTS; i++)
 	{
 		//Multi-packet:
-		//initMultiPeriph(comm_multi_periph+i, i, masterSlave[i]);
+		initMultiPeriph(comm_multi_periph+i, i, masterSlave[i]);
 
 		//Single packets:
 		initCommPeriph(&commPeriph[i], i, masterSlave[i], \
